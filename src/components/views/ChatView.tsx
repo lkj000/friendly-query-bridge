@@ -3,6 +3,7 @@ import { DefaultMessageHandler } from '@/services/messageHandler';
 import { useToast } from '@/hooks/use-toast';
 import { MessageList } from '../chat/MessageList';
 import { ChatInput } from '../chat/ChatInput';
+import { useRealtimeChat } from '@/hooks/useRealtimeChat';
 
 interface Message {
   content: string;
@@ -21,6 +22,7 @@ export const ChatView: React.FC<ChatViewProps> = ({
   const [messages, setMessages] = useState<Message[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
   const { toast } = useToast();
+  const { typingUsers, updateTypingStatus } = useRealtimeChat();
 
   const handleSendMessage = async (message: string, mediaUrl?: string, mediaType?: string) => {
     try {
@@ -48,15 +50,28 @@ export const ChatView: React.FC<ChatViewProps> = ({
       });
     } finally {
       setIsProcessing(false);
+      updateTypingStatus(false);
     }
+  };
+
+  const handleTyping = () => {
+    updateTypingStatus(true);
+    // Debounce typing status update
+    setTimeout(() => updateTypingStatus(false), 1000);
   };
 
   return (
     <div className="flex flex-col h-full">
       <MessageList messages={messages} />
+      {Object.values(typingUsers).some(user => user.isTyping) && (
+        <div className="px-4 py-2 text-sm text-muted-foreground">
+          Someone is typing...
+        </div>
+      )}
       <ChatInput 
         onSendMessage={handleSendMessage} 
-        isProcessing={isProcessing} 
+        isProcessing={isProcessing}
+        onTyping={handleTyping}
       />
     </div>
   );
