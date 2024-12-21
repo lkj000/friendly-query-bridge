@@ -1,14 +1,29 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { corsHeaders, validateJiraCredentials, createJiraDescription } from './jiraUtils.ts';
+import { corsHeaders } from './jiraUtils.ts';
 import { CreateTicketPayload } from './types.ts';
 
 serve(async (req) => {
+  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const credentials = validateJiraCredentials();
+    const email = Deno.env.get('JIRA_EMAIL');
+    const apiToken = Deno.env.get('JIRA_API_TOKEN');
+    const domain = Deno.env.get('JIRA_DOMAIN');
+    const projectKey = Deno.env.get('JIRA_PROJECT_KEY');
+
+    if (!email || !apiToken || !domain || !projectKey) {
+      console.error('Missing JIRA credentials:', {
+        hasEmail: !!email,
+        hasToken: !!apiToken,
+        hasDomain: !!domain,
+        hasProjectKey: !!projectKey
+      });
+      throw new Error('Missing required JIRA credentials');
+    }
+
     const { summary, description, severity, source, filePath, lineNumber }: CreateTicketPayload = await req.json();
 
     console.log('Creating JIRA ticket with payload:', {
@@ -16,22 +31,57 @@ serve(async (req) => {
       severity,
       source,
       filePath,
-      lineNumber
+      lineNumber,
+      projectKey
     });
 
-    const jiraUrl = `https://${credentials.domain}/rest/api/3/issue`;
+    const cleanDomain = domain.replace(/[\/]+$/, '').split('/')[0];
+    const jiraUrl = `https://${cleanDomain}/rest/api/3/issue`;
     console.log('JIRA API URL:', jiraUrl);
 
-    const authToken = btoa(`${credentials.email}:${credentials.apiToken}`);
-    console.log('Auth token generated successfully');
-
+    const authToken = btoa(`${email}:${apiToken}`);
+    
     const requestBody = {
       fields: {
         project: {
-          key: credentials.projectKey
+          key: projectKey
         },
         summary: summary,
-        description: createJiraDescription(description, severity, source, filePath, lineNumber),
+        description: {
+          version: 1,
+          type: "doc",
+          content: [
+            {
+              type: "paragraph",
+              content: [
+                {
+                  type: "text",
+                  text: description
+                }
+              ]
+            },
+            {
+              type: "paragraph",
+              content: [
+                {
+                  type: "text",
+                  text: `Severity: ${severity}`,
+                  marks: [{ type: "strong" }]
+                }
+              ]
+            },
+            {
+              type: "paragraph",
+              content: [
+                {
+                  type: "text",
+                  text: `Source: ${source}`,
+                  marks: [{ type: "strong" }]
+                }
+              ]
+            }
+          ]
+        },
         issuetype: {
           name: "Bug"
         },
@@ -42,6 +92,19 @@ serve(async (req) => {
         }
       }
     };
+
+    if (filePath) {
+      requestBody.fields.description.content.push({
+        type: "paragraph",
+        content: [
+          {
+            type: "text",
+            text: `File: ${filePath}${lineNumber ? `:${lineNumber}` : ''}`,
+            marks: [{ type: "code" }]
+          }
+        ]
+      });
+    }
 
     console.log('Sending request to JIRA with body:', JSON.stringify(requestBody, null, 2));
 
@@ -57,6 +120,7 @@ serve(async (req) => {
 
     const responseText = await response.text();
     console.log('Raw JIRA API response:', responseText);
+    console.log('Response headers:', Object.fromEntries(response.headers.entries()));
 
     let responseData;
     try {

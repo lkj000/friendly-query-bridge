@@ -6,10 +6,3 @@ export interface CreateTicketPayload {
   filePath?: string;
   lineNumber?: number;
 }
-
-export interface JiraCredentials {
-  email: string;
-  apiToken: string;
-  domain: string;
-  projectKey: string;
-}
