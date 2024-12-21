@@ -1,4 +1,4 @@
-export type Conversation = {
+export interface Conversation {
   id: string;
   created_at: string;
   title: string | null;
@@ -6,12 +6,15 @@ export type Conversation = {
   last_message_at: string;
 }
 
-export type ConversationMessage = {
+export interface ConversationMessage {
   id: string;
   content: string;
   user_id: string;
   created_at: string;
-  media_context: any | null;
-  is_bot: boolean | null;
-  conversation_id: string | null;
+  media_context?: {
+    type: string;
+    content: string;
+  } | null;
+  is_bot?: boolean;
+  conversation_id?: string;
 }
