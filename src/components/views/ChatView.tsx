@@ -5,6 +5,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { MessageList } from '@/components/chat/MessageList';
 import { ChatInput } from '@/components/chat/ChatInput';
+import { Button } from '@/components/ui/button';
+import { PlusCircle } from 'lucide-react';
 
 interface ChatViewProps {
   messageHandler: DefaultMessageHandler;
@@ -61,12 +63,19 @@ export const ChatView: React.FC<ChatViewProps> = ({ messageHandler }) => {
     return channel;
   };
 
+  const handleNewChat = () => {
+    setMessages([]);
+    toast({
+      title: "New Chat Started",
+      description: "You can now start a fresh conversation.",
+    });
+  };
+
   const handleSendMessage = async (message: string, mediaContext?: { type: string; content: string }) => {
     if (!message.trim() && !mediaContext) return;
 
     setIsProcessing(true);
     try {
-      // First, insert the user's message
       const { data: userMessage, error: insertError } = await supabase
         .from('messages')
         .insert({
@@ -80,10 +89,8 @@ export const ChatView: React.FC<ChatViewProps> = ({ messageHandler }) => {
 
       if (insertError) throw insertError;
 
-      // Then get the bot's response
       const response = await messageHandler.sendChatMessage(message);
       
-      // Insert the bot's response
       const { data: botMessage, error: botError } = await supabase
         .from('messages')
         .insert({
@@ -96,7 +103,6 @@ export const ChatView: React.FC<ChatViewProps> = ({ messageHandler }) => {
 
       if (botError) throw botError;
 
-      // Update messages state with both new messages
       if (userMessage && botMessage) {
         setMessages(prev => [...prev, userMessage, botMessage]);
       }
@@ -114,6 +120,16 @@ export const ChatView: React.FC<ChatViewProps> = ({ messageHandler }) => {
 
   return (
     <div className="flex flex-col h-full">
+      <div className="flex justify-end p-4">
+        <Button
+          onClick={handleNewChat}
+          variant="outline"
+          className="gap-2"
+        >
+          <PlusCircle className="h-4 w-4" />
+          New Chat
+        </Button>
+      </div>
       <MessageList messages={messages} />
       <ChatInput 
         onSendMessage={handleSendMessage}
