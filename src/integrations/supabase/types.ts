@@ -207,6 +207,42 @@ export type Database = {
         }
         Relationships: []
       }
+      vulnerability_scans: {
+        Row: {
+          assigned_to: string | null
+          created_at: string
+          description: string
+          file_path: string | null
+          id: string
+          line_number: number | null
+          severity: string
+          source: string
+          status: string | null
+        }
+        Insert: {
+          assigned_to?: string | null
+          created_at?: string
+          description: string
+          file_path?: string | null
+          id?: string
+          line_number?: number | null
+          severity: string
+          source: string
+          status?: string | null
+        }
+        Update: {
+          assigned_to?: string | null
+          created_at?: string
+          description?: string
+          file_path?: string | null
+          id?: string
+          line_number?: number | null
+          severity?: string
+          source?: string
+          status?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

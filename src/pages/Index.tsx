@@ -1,6 +1,7 @@
 import { OkoSidebar } from "@/components/sidebar/OkoSidebar";
 import { ChatView } from "@/components/views/ChatView";
 import { ReportView } from "@/components/views/ReportView";
+import { VulnerabilityView } from "@/components/views/VulnerabilityView";
 import { MessageHandler } from "@/services/messageHandler";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
@@ -9,11 +10,10 @@ import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "@/hooks/use-toast";
 
 export function Index() {
-  const [activeView, setActiveView] = useState('chat');
+  const [activeView, setActiveView] = useState('vulnerabilities');
   const messageHandler = MessageHandler.getInstance();
   const { user } = useAuth();
 
-  // Example of secure data fetching with authentication
   const { data: totalIncidents } = useQuery({
     queryKey: ['totalIncidents'],
     queryFn: async () => {
@@ -31,7 +31,7 @@ export function Index() {
         throw error;
       }
       
-      return data || { count: 0 }; // Return default value if no data
+      return data || { count: 0 };
     },
     enabled: !!user,
   });
@@ -44,6 +44,7 @@ export function Index() {
       
       <div className="flex-1">
         {activeView === 'chat' && <ChatView messageHandler={messageHandler} />}
+        {activeView === 'vulnerabilities' && <VulnerabilityView />}
         {activeView === 'veracode' && (
           <ReportView type="veracode" title="Veracode Security Report" />
         )}
