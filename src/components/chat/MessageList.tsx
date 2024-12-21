@@ -1,10 +1,12 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 
 interface Message {
   content: string;
-  isUser: boolean;
-  mediaUrl?: string;
-  mediaType?: string;
+  is_bot: boolean;
+  media_context?: {
+    type: string;
+    content: string;
+  };
 }
 
 interface MessageListProps {
@@ -12,35 +14,45 @@ interface MessageListProps {
 }
 
 export const MessageList: React.FC<MessageListProps> = ({ messages }) => {
-  const renderMedia = (message: Message) => {
-    if (!message.mediaUrl) return null;
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
-    if (message.mediaType?.startsWith('image/')) {
-      return <img src={message.mediaUrl} alt="Uploaded content" className="max-w-full h-auto rounded-lg" />;
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
+
+  const renderMedia = (message: Message) => {
+    if (!message.media_context) return null;
+    const { type, content } = message.media_context;
+
+    if (type?.startsWith('image/')) {
+      return <img src={content} alt="Uploaded content" className="max-w-full h-auto rounded-lg" />;
     }
 
-    if (message.mediaType?.startsWith('video/')) {
+    if (type?.startsWith('video/')) {
       return (
         <video controls className="max-w-full rounded-lg">
-          <source src={message.mediaUrl} type={message.mediaType} />
+          <source src={content} type={type} />
           Your browser does not support the video tag.
         </video>
       );
     }
 
-    if (message.mediaType?.startsWith('audio/')) {
+    if (type?.startsWith('audio/')) {
       return (
         <audio controls className="w-full">
-          <source src={message.mediaUrl} type={message.mediaType} />
+          <source src={content} type={type} />
           Your browser does not support the audio tag.
         </audio>
       );
     }
 
-    // For other file types (PDF, text, etc.), show a download link
     return (
       <a 
-        href={message.mediaUrl} 
+        href={content} 
         target="_blank" 
         rel="noopener noreferrer" 
         className="text-blue-500 hover:underline"
@@ -51,22 +63,25 @@ export const MessageList: React.FC<MessageListProps> = ({ messages }) => {
   };
 
   return (
-    <div className="flex-1 overflow-y-auto mb-4 space-y-4 p-4">
+    <div className="flex-1 overflow-y-auto p-4 space-y-4">
       {messages.map((message, index) => (
         <div
           key={index}
           className={`p-4 rounded-lg ${
-            message.isUser ? 'bg-primary text-primary-foreground ml-auto' : 'bg-secondary'
-          } max-w-[80%]`}
+            message.is_bot 
+              ? 'bg-secondary mr-auto max-w-[80%]' 
+              : 'bg-primary text-primary-foreground ml-auto max-w-[80%]'
+          }`}
         >
           <div className="break-words">{message.content}</div>
-          {message.mediaUrl && (
+          {message.media_context && (
             <div className="mt-2">
               {renderMedia(message)}
             </div>
           )}
         </div>
       ))}
+      <div ref={messagesEndRef} />
     </div>
   );
 };

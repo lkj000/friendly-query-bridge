@@ -19,7 +19,10 @@ export const ChatView: React.FC<ChatViewProps> = ({ messageHandler }) => {
   useEffect(() => {
     if (user) {
       fetchMessages();
-      subscribeToMessages();
+      const channel = subscribeToMessages();
+      return () => {
+        supabase.removeChannel(channel);
+      };
     }
   }, [user]);
 
@@ -43,19 +46,17 @@ export const ChatView: React.FC<ChatViewProps> = ({ messageHandler }) => {
   };
 
   const subscribeToMessages = () => {
-    const subscription = supabase
+    return supabase
       .channel('messages')
-      .on('postgres_changes', 
+      .on(
+        'postgres_changes',
         { event: 'INSERT', schema: 'public', table: 'messages' },
         (payload) => {
+          console.log('New message received:', payload);
           setMessages(prev => [...prev, payload.new]);
         }
       )
       .subscribe();
-
-    return () => {
-      subscription.unsubscribe();
-    };
   };
 
   const handleSendMessage = async (message: string, mediaUrl?: string, mediaType?: string) => {
@@ -63,10 +64,38 @@ export const ChatView: React.FC<ChatViewProps> = ({ messageHandler }) => {
 
     setIsProcessing(true);
     try {
-      const mediaContext = mediaUrl ? { type: mediaType, content: mediaUrl } : undefined;
-      await messageHandler.sendChatMessage(message, mediaContext);
+      // First, insert the user's message
+      const { error: insertError } = await supabase
+        .from('messages')
+        .insert({
+          content: message,
+          user_id: user?.id,
+          media_context: mediaUrl ? { type: mediaType, content: mediaUrl } : null,
+          is_bot: false
+        });
+
+      if (insertError) throw insertError;
+
+      // Then get the bot's response
+      const response = await messageHandler.sendChatMessage(message);
+      
+      // Insert the bot's response
+      const { error: botError } = await supabase
+        .from('messages')
+        .insert({
+          content: response,
+          user_id: user?.id,
+          is_bot: true
+        });
+
+      if (botError) throw botError;
     } catch (error) {
-      console.error('Error sending message:', error);
+      console.error('Error in chat interaction:', error);
+      toast({
+        title: "Error sending message",
+        description: "Could not send message. Please try again.",
+        variant: "destructive",
+      });
     } finally {
       setIsProcessing(false);
     }
