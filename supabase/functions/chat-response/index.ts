@@ -65,5 +65,5 @@ async function generateResponse(message: string, supabase: any): Promise<string>
   }
 
   // Default response for unhandled questions
-  return "I can help you with information about:\n- Security vulnerabilities\n- Incident trends\n- API integration status\n- Major incidents\n\nPlease ask about any of these topics!"
+  return "I can help you with information about:\n- Security vulnerabilities\n- Incident trends\n- API integration status\n- Major incidents\n\nPlease ask about any of these topics!";
 }
