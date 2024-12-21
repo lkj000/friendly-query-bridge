@@ -4,7 +4,7 @@ import { ReportView } from "@/components/views/ReportView";
 import { MessageHandler } from "@/services/messageHandler";
 import { useState } from "react";
 
-export default function Index() {
+export function Index() {
   const [activeView, setActiveView] = useState('chat');
   const messageHandler = MessageHandler.getInstance();
 
