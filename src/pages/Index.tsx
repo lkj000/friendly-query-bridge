@@ -20,7 +20,7 @@ export function Index() {
       const { data, error } = await supabase
         .from('total_incidents')
         .select('*')
-        .single();
+        .maybeSingle();
       
       if (error) {
         toast({
@@ -31,7 +31,7 @@ export function Index() {
         throw error;
       }
       
-      return data;
+      return data || { count: 0 }; // Return default value if no data
     },
     enabled: !!user,
   });

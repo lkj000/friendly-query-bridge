@@ -5,6 +5,7 @@ import { useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/lib/supabase";
 import { toast } from "@/hooks/use-toast";
+import { AuthError } from "@supabase/supabase-js";
 
 export function Login() {
   const navigate = useNavigate();
@@ -24,11 +25,10 @@ export function Login() {
       }
       
       // Handle authentication errors
-      if (event === 'USER_AUTHENTICATION_FAILED') {
+      if (event === 'SIGNED_OUT') {
         toast({
-          title: "Authentication Error",
-          description: "Please check your credentials and try again",
-          variant: "destructive",
+          title: "Signed out",
+          description: "You have been signed out successfully",
         });
       }
     });
