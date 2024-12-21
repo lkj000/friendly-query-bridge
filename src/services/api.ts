@@ -23,10 +23,29 @@ interface ChatResponse {
 }
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+const IS_VSCODE = typeof acquireVsCodeApi !== 'undefined';
 
 export const api = {
   async fetchSecurityReport(type: 'veracode' | 'sonar' | 'prisma'): Promise<ApiResponse<SecurityReport>> {
     try {
+      if (IS_VSCODE) {
+        // Handle VS Code extension communication
+        const vscode = acquireVsCodeApi();
+        vscode.postMessage({
+          type: 'fetchReport',
+          payload: { type }
+        });
+        // Return mock data for now
+        return {
+          data: {
+            highSeverity: 0,
+            mediumSeverity: 0,
+            lastUpdated: new Date().toISOString(),
+            details: []
+          }
+        };
+      }
+
       const response = await fetch(`${API_BASE_URL}/api/reports/${type}`);
       if (!response.ok) {
         throw new Error('Failed to fetch report');
@@ -45,6 +64,22 @@ export const api = {
 
   async sendChatMessage(message: string): Promise<ApiResponse<ChatResponse>> {
     try {
+      if (IS_VSCODE) {
+        // Handle VS Code extension communication
+        const vscode = acquireVsCodeApi();
+        vscode.postMessage({
+          type: 'sendMessage',
+          payload: { message }
+        });
+        // Return mock data for now
+        return {
+          data: {
+            reply: "Message sent through VS Code extension",
+            context: "VS Code"
+          }
+        };
+      }
+
       const response = await fetch(`${API_BASE_URL}/api/chat`, {
         method: 'POST',
         headers: {
@@ -69,6 +104,10 @@ export const api = {
 
   async checkVpnConnection(): Promise<boolean> {
     try {
+      if (IS_VSCODE) {
+        // In VS Code extension, assume VPN is connected
+        return true;
+      }
       const response = await fetch(`${API_BASE_URL}/api/vpn/status`);
       return response.ok;
     } catch {
