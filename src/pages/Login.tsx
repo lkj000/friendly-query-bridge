@@ -18,9 +18,18 @@ export function Login() {
     // Listen for auth state changes to show error messages
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
+    } = supabase.auth.onAuthStateChange((event, session) => {
       if (session?.user) {
         navigate("/");
+      }
+      
+      // Handle authentication errors
+      if (event === 'USER_AUTHENTICATION_FAILED') {
+        toast({
+          title: "Authentication Error",
+          description: "Please check your credentials and try again",
+          variant: "destructive",
+        });
       }
     });
 
