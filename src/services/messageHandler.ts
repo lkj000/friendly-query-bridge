@@ -1,41 +1,21 @@
-export interface WebviewMessage {
-  type: 'fetchReport' | 'sendMessage';
-  payload: any;
+export interface MessageHandler {
+  sendChatMessage: (message: string, mediaContext?: { type: string; content: string }) => Promise<string>;
 }
 
-const API_URL = 'http://localhost:8000';
-
-export class MessageHandler {
-  private static instance: MessageHandler;
+export class DefaultMessageHandler implements MessageHandler {
+  private static instance: DefaultMessageHandler;
 
   private constructor() {}
 
-  public static getInstance(): MessageHandler {
-    if (!MessageHandler.instance) {
-      MessageHandler.instance = new MessageHandler();
+  static getInstance(): DefaultMessageHandler {
+    if (!DefaultMessageHandler.instance) {
+      DefaultMessageHandler.instance = new DefaultMessageHandler();
     }
-    return MessageHandler.instance;
+    return DefaultMessageHandler.instance;
   }
 
-  public async sendChatMessage(message: string): Promise<string> {
-    try {
-      const response = await fetch(`${API_URL}/api/chat`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ message })
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const data = await response.json();
-      return data.reply;
-    } catch (error) {
-      console.error('Error sending message:', error);
-      throw error;
-    }
+  async sendChatMessage(message: string, mediaContext?: { type: string; content: string }): Promise<string> {
+    // Simulate sending a message and receiving a response
+    return `Response to: ${message}`;
   }
 }

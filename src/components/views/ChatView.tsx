@@ -29,7 +29,9 @@ export const ChatView: React.FC<ChatViewProps> = ({ messageHandler = MessageHand
       };
       setMessages(prev => [...prev, newMessage]);
 
-      const response = await messageHandler.sendChatMessage(message, mediaUrl ? { type: mediaType || '', content: mediaUrl } : undefined);
+      const mediaContext = mediaUrl ? { type: mediaType || '', content: mediaUrl } : undefined;
+      const response = await messageHandler.sendChatMessage(message, mediaContext);
+      
       if (response) {
         setMessages(prev => [...prev, { content: response, isUser: false }]);
       }
