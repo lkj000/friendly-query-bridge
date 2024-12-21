@@ -9,6 +9,36 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      api_integrations: {
+        Row: {
+          created_at: string
+          headers: Json | null
+          id: string
+          is_active: boolean | null
+          name: string
+          type: string
+          url: string
+        }
+        Insert: {
+          created_at?: string
+          headers?: Json | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          type: string
+          url: string
+        }
+        Update: {
+          created_at?: string
+          headers?: Json | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          type?: string
+          url?: string
+        }
+        Relationships: []
+      }
       incidents_caused_by_change: {
         Row: {
           count: number | null

@@ -6,14 +6,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import { Settings, Plus, Trash2 } from "lucide-react";
-
-interface ApiIntegration {
-  id: string;
-  name: string;
-  url: string;
-  type: string;
-  isActive: boolean;
-}
+import type { ApiIntegration } from "@/integrations/supabase/database.types";
 
 export function ApiIntegrationsView() {
   const { toast } = useToast();
@@ -52,7 +45,8 @@ export function ApiIntegrationsView() {
           name: newIntegration.name,
           url: newIntegration.url,
           type: newIntegration.type,
-          isActive: true
+          is_active: true,
+          headers: {}
         }]);
 
       if (error) throw error;
@@ -64,11 +58,11 @@ export function ApiIntegrationsView() {
 
       setNewIntegration({ name: '', url: '', type: 'custom' });
       refetch();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error adding integration:', error);
       toast({
         title: "Error Adding Integration",
-        description: "Failed to add integration. Please try again.",
+        description: error.message || "Failed to add integration. Please try again.",
         variant: "destructive",
       });
     }
@@ -89,11 +83,11 @@ export function ApiIntegrationsView() {
       });
 
       refetch();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error deleting integration:', error);
       toast({
         title: "Error Deleting Integration",
-        description: "Failed to delete integration. Please try again.",
+        description: error.message || "Failed to delete integration. Please try again.",
         variant: "destructive",
       });
     }
