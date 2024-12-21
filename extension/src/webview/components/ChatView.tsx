@@ -16,6 +16,11 @@ export const ChatView: React.FC<ChatViewProps> = ({ messageHandler }) => {
   const [isProcessing, setIsProcessing] = useState(false);
   const { toast } = useToast();
 
+  const handleNewChat = () => {
+    setMessages([]);
+    setInputValue('');
+  };
+
   const handleSendMessage = async () => {
     if (!inputValue.trim()) return;
 
@@ -143,7 +148,7 @@ export const ChatView: React.FC<ChatViewProps> = ({ messageHandler }) => {
 
   return (
     <div className="flex flex-col h-full">
-      <ChatHeader />
+      <ChatHeader onNewChat={handleNewChat} />
       <div className="flex-1 overflow-y-auto mb-4 space-y-4 p-4">
         {messages.map((message, index) => (
           <div
