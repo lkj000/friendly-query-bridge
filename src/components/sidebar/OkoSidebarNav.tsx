@@ -9,7 +9,7 @@ interface OkoSidebarNavProps {
 
 export function OkoSidebarNav({ activeView, onViewChange }: OkoSidebarNavProps) {
   return (
-    <nav className="flex-1 p-2 space-y-2">
+    <nav className="flex flex-col p-4 space-y-2">
       <Button
         variant={activeView === 'vulnerabilities' ? 'default' : 'ghost'}
         className="w-full justify-start"
