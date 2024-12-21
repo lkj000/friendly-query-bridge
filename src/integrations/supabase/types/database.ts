@@ -1,12 +1,5 @@
-export type ApiIntegration = {
-  id: string;
-  created_at: string;
-  name: string;
-  url: string;
-  type: string;
-  is_active: boolean;
-  headers: Record<string, any>;
-}
+import { ApiIntegration } from './api';
+import { Conversation, ConversationMessage } from './conversations';
 
 export type Tables = {
   api_integrations: {
