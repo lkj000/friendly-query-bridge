@@ -26,46 +26,17 @@ export class DefaultMessageHandler implements MessageHandler {
       const { data: userData, error: userError } = await supabase.auth.getUser();
       if (userError) throw userError;
 
-      // Insert user message
-      const { error: insertError } = await supabase
-        .from('messages')
-        .insert({
-          content: message,
-          user_id: userData.user.id,
-          media_context: mediaContext,
-          is_bot: false
+      // Call Edge Function for chat response
+      const { data, error: functionError } = await supabase.functions
+        .invoke('chat-response', {
+          body: { message }
         });
 
-      if (insertError) throw insertError;
+      if (functionError) throw functionError;
 
-      // Get response from Edge Function
-      const response = await fetch(`${SUPABASE_URL}/functions/v1/chat-response`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
-        },
-        body: JSON.stringify({ message }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to get response from chat service');
-      }
-
-      const { reply } = await response.json();
-      
-      // Insert bot response
-      const { error: botError } = await supabase
-        .from('messages')
-        .insert({
-          content: reply,
-          user_id: userData.user.id,
-          is_bot: true
-        });
-
-      if (botError) throw botError;
-
+      const reply = data?.reply || "I'm sorry, I couldn't process your message.";
       return reply;
+
     } catch (error) {
       console.error('Error in sendChatMessage:', error);
       toast({

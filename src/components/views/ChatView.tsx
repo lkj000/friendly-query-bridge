@@ -21,7 +21,7 @@ export const ChatView: React.FC<ChatViewProps> = ({ messageHandler }) => {
       fetchMessages();
       const channel = subscribeToMessages();
       return () => {
-        supabase.removeChannel(channel);
+        channel.unsubscribe();
       };
     }
   }, [user]);
@@ -46,7 +46,7 @@ export const ChatView: React.FC<ChatViewProps> = ({ messageHandler }) => {
   };
 
   const subscribeToMessages = () => {
-    return supabase
+    const channel = supabase
       .channel('messages')
       .on(
         'postgres_changes',
@@ -57,6 +57,8 @@ export const ChatView: React.FC<ChatViewProps> = ({ messageHandler }) => {
         }
       )
       .subscribe();
+
+    return channel;
   };
 
   const handleSendMessage = async (message: string, mediaUrl?: string, mediaType?: string) => {
@@ -65,14 +67,16 @@ export const ChatView: React.FC<ChatViewProps> = ({ messageHandler }) => {
     setIsProcessing(true);
     try {
       // First, insert the user's message
-      const { error: insertError } = await supabase
+      const { data: userMessage, error: insertError } = await supabase
         .from('messages')
         .insert({
           content: message,
           user_id: user?.id,
           media_context: mediaUrl ? { type: mediaType, content: mediaUrl } : null,
           is_bot: false
-        });
+        })
+        .select()
+        .maybeSingle();
 
       if (insertError) throw insertError;
 
@@ -80,15 +84,22 @@ export const ChatView: React.FC<ChatViewProps> = ({ messageHandler }) => {
       const response = await messageHandler.sendChatMessage(message);
       
       // Insert the bot's response
-      const { error: botError } = await supabase
+      const { data: botMessage, error: botError } = await supabase
         .from('messages')
         .insert({
           content: response,
           user_id: user?.id,
           is_bot: true
-        });
+        })
+        .select()
+        .maybeSingle();
 
       if (botError) throw botError;
+
+      // Update messages state with both new messages
+      if (userMessage && botMessage) {
+        setMessages(prev => [...prev, userMessage, botMessage]);
+      }
     } catch (error) {
       console.error('Error in chat interaction:', error);
       toast({
