@@ -23,10 +23,40 @@ interface ChatResponse {
   context?: string;
 }
 
+interface AudioUploadResponse {
+  audio_context: string;
+}
+
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 const vscode = getVsCodeApi();
 
 export const api = {
+  async uploadAudio(file: File): Promise<ApiResponse<AudioUploadResponse>> {
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const response = await fetch(`${API_BASE_URL}/api/upload-audio`, {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to upload audio');
+      }
+
+      const data = await response.json();
+      return { data };
+    } catch (error) {
+      toast({
+        title: "Error uploading audio",
+        description: "Could not upload audio file. Please try again.",
+        variant: "destructive",
+      });
+      return { error: 'Failed to upload audio' };
+    }
+  },
+
   async fetchSecurityReport(type: 'veracode' | 'sonar' | 'prisma'): Promise<ApiResponse<SecurityReport>> {
     try {
       if (vscode) {
