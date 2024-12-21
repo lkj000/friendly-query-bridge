@@ -12,7 +12,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "@/hooks/use-toast";
 
 export function Index() {
-  const [activeView, setActiveView] = useState('dashboard');
+  const [activeView, setActiveView] = useState('chat');
   const messageHandler = DefaultMessageHandler.getInstance();
   const { user } = useAuth();
 

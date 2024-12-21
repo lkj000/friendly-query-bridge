@@ -8,7 +8,7 @@ import { OkoSidebarNav } from '@/components/sidebar/OkoSidebarNav';
 import { MessageHandler } from './messageHandler';
 
 const WebviewApp: React.FC = () => {
-  const [activeView, setActiveView] = React.useState<string>('dashboard');
+  const [activeView, setActiveView] = React.useState<string>('chat');
   const messageHandler = MessageHandler.getInstance();
 
   return (
