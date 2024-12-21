@@ -1,73 +1,91 @@
-# OKO Extension for VS Code
+# Multimodal RAG Chat Application
 
-🛡️ Elevate your development workflow with real-time security insights and quality metrics, right where you code.
+A powerful chat application that supports multimodal interactions including text, audio, images, and documents. Built with React, TypeScript, and Supabase.
 
-## Overview
+## Features
 
-The OKO VS Code Extension seamlessly integrates critical security and quality reports from Veracode, Sonar, and Prisma directly into your development environment. Stay informed, secure, and efficient without leaving your editor.
+- Real-time chat with AI assistance
+- Support for multiple file types:
+  - Audio (wav, mp3)
+  - Images (jpg, png, gif)
+  - Documents (pdf, docx)
+  - Spreadsheets (xlsx, csv)
+- Secure authentication
+- Message persistence
+- File storage
+- Responsive design
 
-## 🌟 Key Features
+## Getting Started
 
-- **Security Integration**: Real-time vulnerability assessments from Veracode, Sonar, and Prisma
-- **AI Assistant**: Natural language queries with context-aware responses using RAG technology
-- **Developer-Centric**: Intuitive sidebar interface with one-click access to metrics
-- **Enterprise Security**: Secure VPN-based authentication via Platform Dashboard
+### Prerequisites
 
-## 🚀 Quick Start
+- Node.js 16+
+- npm or yarn
+- Python 3.8+ (for backend)
 
-1. Install dependencies:
-   ```bash
-   npm install
-   cd backend && pip install -r requirements.txt
-   ```
+### Installation
 
-2. Configure Supabase:
-   - Enable Email authentication
-   - Set required environment variables
+1. Clone the repository
+```bash
+git clone <repository-url>
+cd <project-directory>
+```
 
-3. Start the services:
-   ```bash
-   cd backend && uvicorn main:app --reload
-   npm run dev
-   ```
+2. Install frontend dependencies
+```bash
+npm install
+```
 
-## 📊 Views
+3. Set up backend
+```bash
+cd backend
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+pip install -r requirements.txt
+```
 
-| View | Description |
-|------|-------------|
-| Ask Me | AI-powered security assistant |
-| Prisma Report | Cloud security insights |
-| Sonar Report | Code quality metrics |
-| Veracode Report | Security vulnerability analysis |
+4. Create a `.env` file in the root directory with your Supabase credentials:
+```
+VITE_SUPABASE_URL=your_supabase_url
+VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
+```
 
-## 🛠️ Development
+### Development
 
-### Authentication
-1. Enable Email auth in Supabase Console
-2. Disable email verification for testing
+Start the development server:
+```bash
+npm run dev
+```
 
-### Platform Integration
-- User authentication
-- Database access
-- RLS policies
-- API access
+### Production
 
-## 📚 Documentation
+Build for production:
+```bash
+npm run build
+```
 
-For detailed information about installation, API endpoints, components, and best practices, visit our [Documentation](./docs/README.md).
+Preview production build:
+```bash
+npm run preview
+```
 
-## 🤝 Contributing
+## Architecture
 
-We welcome contributions! Please see our [Contributing Guidelines](./CONTRIBUTING.md).
+- Frontend: React + TypeScript + Vite
+- UI Components: shadcn/ui + Tailwind CSS
+- State Management: React Query
+- Backend: Supabase
+- File Storage: Supabase Storage
+- Authentication: Supabase Auth
 
-## 📄 License
+## Contributing
 
-Copyright © 2024 Okovanggoai. All rights reserved.
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
 
-MIT License
+## License
 
----
-
-> "Security is not a product, but a process." - Bruce Schneier
-
-Made with ❤️ by Okovanggoai (okovanggoai.com)
+This project is licensed under the MIT License - see the LICENSE file for details.
