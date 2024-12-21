@@ -1,6 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from './use-toast';
+import { RealtimePresenceState } from '@supabase/supabase-js';
 
 interface ChatPresence {
   user: string;
@@ -16,8 +17,7 @@ export const useRealtimeChat = () => {
     const channel = supabase.channel('chat_room')
       .on('presence', { event: 'sync' }, () => {
         const state = channel.presenceState<ChatPresence>();
-        console.log('Presence state updated:', state);
-        setTypingUsers(state);
+        setTypingUsers(prevState => ({ ...prevState, ...state }));
       })
       .on('presence', { event: 'join' }, ({ key, newPresences }) => {
         console.log('User joined:', key, newPresences);

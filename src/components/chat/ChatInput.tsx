@@ -16,8 +16,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
   const [message, setMessage] = useState("");
   const [mediaContext, setMediaContext] = useState<{ url: string; type: string } | null>(null);
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = () => {
     if (message.trim() || mediaContext) {
       onSendMessage(message, mediaContext?.url, mediaContext?.type);
       setMessage("");
@@ -34,7 +33,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
     <div className="border-t p-4 bg-background/80 backdrop-blur-sm">
       <div className="flex flex-col gap-4 max-w-4xl mx-auto">
         <MediaButtons onFileSelect={() => {}} disabled={isProcessing} />
-        <form onSubmit={handleSubmit} className="flex items-center gap-4">
+        <div className="flex items-center gap-4">
           <MessageInput
             value={message}
             onChange={handleMessageChange}
@@ -42,7 +41,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
             disabled={isProcessing}
             placeholder={isProcessing ? "Processing message..." : "Type your message..."}
           />
-        </form>
+        </div>
         {mediaContext && (
           <div className="text-sm text-muted-foreground">
             File ready to send: {mediaContext.type}
