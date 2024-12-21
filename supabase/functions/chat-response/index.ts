@@ -41,11 +41,47 @@ serve(async (req) => {
 })
 
 async function generateResponse(message: string, supabase: any): Promise<string> {
+  // Handle security vulnerabilities question
+  if (message.includes('security') || message.includes('vulnerabilit')) {
+    console.log('Fetching vulnerability data...')
+    
+    const { data: vulns, error } = await supabase
+      .from('vulnerability_scans')
+      .select('*')
+      .order('severity', { ascending: false })
+    
+    if (error) {
+      console.error('Error fetching vulnerabilities:', error)
+      return "Sorry, I couldn't fetch the vulnerability data."
+    }
+
+    const severityCounts = vulns.reduce((acc: any, curr: any) => {
+      acc[curr.severity] = (acc[curr.severity] || 0) + 1
+      return acc
+    }, {})
+
+    const response = [
+      '🛡️ Security Vulnerabilities Summary:\n',
+      `Total Vulnerabilities: ${vulns.length}\n`,
+      '\nBreakdown by Severity:',
+      `- Critical: ${severityCounts.critical || 0}`,
+      `- High: ${severityCounts.high || 0}`,
+      `- Medium: ${severityCounts.medium || 0}`,
+      `- Low: ${severityCounts.low || 0}\n`,
+      '\nRecent Critical/High Issues:',
+      ...vulns
+        .filter((v: any) => ['critical', 'high'].includes(v.severity))
+        .slice(0, 3)
+        .map((v: any) => `- ${v.severity.toUpperCase()}: ${v.description}`)
+    ].join('\n')
+
+    return response
+  }
+
   // Handle incident trends question
   if (message.includes('incident') && message.includes('trend')) {
     console.log('Fetching incident trends data...')
     
-    // Get total incidents
     const { data: totalIncidents, error: totalError } = await supabase
       .from('total_incidents')
       .select('count')
@@ -98,11 +134,17 @@ async function generateResponse(message: string, supabase: any): Promise<string>
       .order('month_year', { ascending: false })
       .limit(1)
 
+    const { data: majorCanceled } = await supabase
+      .from('majorincidentdata_canceled')
+      .select('count')
+      .order('month_year', { ascending: false })
+      .limit(1)
+
     // Format the response
     const response = [
-      `📊 Current Incident Trends Summary:\n`,
+      '📊 Current Incident Trends Summary:\n',
       `Total Incidents: ${totalIncidents?.count || 0}\n`,
-      `\nIncidents by State:`,
+      '\nIncidents by State:',
       `- New: ${stateData.new || 0}`,
       `- In Progress: ${stateData.inprogress || 0}`,
       `- Resolved: ${stateData.resolved || 0}`,
@@ -110,9 +152,75 @@ async function generateResponse(message: string, supabase: any): Promise<string>
       `- Canceled: ${stateData.canceled || 0}`,
       `- On Hold: ${stateData.onhold || 0}`,
       `- Awaiting Vendor: ${stateData.awaitingvendorresolved || 0}\n`,
-      `\nMajor Incidents:`,
+      '\nMajor Incidents This Month:',
       `- Accepted: ${majorAccepted?.[0]?.count || 0}`,
-      `- Rejected: ${majorRejected?.[0]?.count || 0}`
+      `- Rejected: ${majorRejected?.[0]?.count || 0}`,
+      `- Canceled: ${majorCanceled?.[0]?.count || 0}`
+    ].join('\n')
+
+    return response
+  }
+
+  // Handle API integration status
+  if (message.includes('api') || message.includes('integration')) {
+    console.log('Fetching API integration status...')
+    
+    const { data: integrations, error } = await supabase
+      .from('api_integrations')
+      .select('*')
+    
+    if (error) {
+      console.error('Error fetching API integrations:', error)
+      return "Sorry, I couldn't fetch the API integration status."
+    }
+
+    const activeCount = integrations.filter((i: any) => i.is_active).length
+    
+    const response = [
+      '🔌 API Integration Status:\n',
+      `Total Integrations: ${integrations.length}`,
+      `Active Integrations: ${activeCount}`,
+      `Inactive Integrations: ${integrations.length - activeCount}\n`,
+      '\nIntegration Details:',
+      ...integrations.map((i: any) => 
+        `- ${i.name}: ${i.is_active ? '✅ Active' : '❌ Inactive'} (${i.type})`
+      )
+    ].join('\n')
+
+    return response
+  }
+
+  // Handle major incidents question
+  if (message.includes('major') && message.includes('incident')) {
+    console.log('Fetching major incidents data...')
+    
+    const tables = ['accepted', 'rejected', 'canceled']
+    const majorIncidents: Record<string, number> = {}
+    
+    for (const status of tables) {
+      const { data, error } = await supabase
+        .from(`majorincidentdata_${status}`)
+        .select('count')
+        .order('month_year', { ascending: false })
+        .limit(1)
+
+      if (error) {
+        console.error(`Error fetching major incidents (${status}):`, error)
+        continue
+      }
+
+      majorIncidents[status] = data?.[0]?.count || 0
+    }
+
+    const total = Object.values(majorIncidents).reduce((a, b) => a + b, 0)
+    
+    const response = [
+      '🚨 Major Incidents Summary:\n',
+      `Total Major Incidents: ${total}\n`,
+      '\nStatus Breakdown:',
+      `- Accepted: ${majorIncidents.accepted || 0} (${((majorIncidents.accepted || 0) / total * 100).toFixed(1)}%)`,
+      `- Rejected: ${majorIncidents.rejected || 0} (${((majorIncidents.rejected || 0) / total * 100).toFixed(1)}%)`,
+      `- Canceled: ${majorIncidents.canceled || 0} (${((majorIncidents.canceled || 0) / total * 100).toFixed(1)}%)`
     ].join('\n')
 
     return response
