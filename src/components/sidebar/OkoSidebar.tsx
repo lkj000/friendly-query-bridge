@@ -8,7 +8,7 @@ export function OkoSidebar() {
   return (
     <div className="flex flex-col h-screen bg-background border-r">
       <div className="p-4 border-b">
-        <h2 className="text-lg font-semibold">OKO Security</h2>
+        <h2 className="text-lg font-semibold">OKO</h2>
       </div>
       
       <nav className="flex-1 p-2 space-y-2">
