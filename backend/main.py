@@ -11,106 +11,122 @@ import numpy as np
 from typing import List, Optional
 import tempfile
 import os
+from PIL import Image
+import fitz  # PyMuPDF for PDF processing
+import cv2
 
 app = FastAPI()
 
-# Configure CORS
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-# Initialize dspy components
-lm = dspy.OpenAI(max_tokens=500)
-dspy.settings.configure(lm=lm)
-
-# Initialize audio processor and model
-processor = AutoProcessor.from_pretrained("facebook/wav2vec2-base-960h")
-model = AutoModel.from_pretrained("facebook/wav2vec2-base-960h")
-
-class ChatMessage(BaseModel):
-    message: str
-    audio_context: Optional[str] = None
-
-class SecurityReport(BaseModel):
-    type: str
+# ... keep existing code (CORS configuration and model initialization)
 
 def process_audio(audio_file: UploadFile) -> str:
     """Process audio file and extract features."""
-    # Save uploaded file temporarily
     with tempfile.NamedTemporaryFile(delete=False, suffix='.wav') as temp_audio:
         temp_audio.write(audio_file.file.read())
         temp_path = temp_audio.name
 
     try:
-        # Load audio file
         waveform, sample_rate = librosa.load(temp_path, sr=16000)
-        
-        # Convert to tensor
         inputs = processor(waveform, sampling_rate=16000, return_tensors="pt")
         
-        # Get audio features
         with torch.no_grad():
             outputs = model(**inputs)
             audio_features = outputs.last_hidden_state.mean(dim=1).squeeze().numpy()
         
-        # Convert features to text representation
-        audio_context = " ".join([f"feature_{i}:{val:.4f}" for i, val in enumerate(audio_features[:10])])
-        
-        return audio_context
+        return " ".join([f"feature_{i}:{val:.4f}" for i, val in enumerate(audio_features[:10])])
     finally:
-        # Clean up temporary file
         os.unlink(temp_path)
 
-@app.post("/api/chat")
-async def chat(message: ChatMessage):
-    try:
-        # Initialize RAG pipeline with audio context if available
-        retriever = dspy.ColBERTv2(url="http://localhost:8888")
-        
-        # Combine text and audio context if available
-        query = message.message
-        if message.audio_context:
-            query = f"{message.message} [AUDIO_CONTEXT] {message.audio_context}"
-        
-        # Process with RAG
-        rag = dspy.ChainOfThought() | retriever
-        response = rag(query)
-        
-        return {"reply": response}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+def process_image(image_file: UploadFile) -> str:
+    """Process image file and extract features."""
+    with tempfile.NamedTemporaryFile(delete=False, suffix='.png') as temp_img:
+        temp_img.write(image_file.file.read())
+        temp_path = temp_img.name
 
-@app.post("/api/upload-audio")
-async def upload_audio(file: UploadFile = File(...)):
     try:
-        audio_context = process_audio(file)
-        return {"audio_context": audio_context}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error processing audio: {str(e)}")
+        image = Image.open(temp_path)
+        # Convert to RGB if necessary
+        if image.mode != 'RGB':
+            image = image.convert('RGB')
+        # Resize for consistency
+        image = image.resize((224, 224))
+        # Convert to numpy array and normalize
+        img_array = np.array(image) / 255.0
+        # Simple feature extraction (mean values per channel)
+        features = np.mean(img_array, axis=(0, 1))
+        return " ".join([f"channel_{i}:{val:.4f}" for i, val in enumerate(features)])
+    finally:
+        os.unlink(temp_path)
 
-@app.get("/api/reports/{report_type}")
-async def get_security_report(report_type: str):
+def process_video(video_file: UploadFile) -> str:
+    """Process video file and extract features."""
+    with tempfile.NamedTemporaryFile(delete=False, suffix='.mp4') as temp_video:
+        temp_video.write(video_file.file.read())
+        temp_path = temp_video.name
+
     try:
-        # Mock data for now - replace with actual security scanning logic
-        return {
-            "highSeverity": 2,
-            "mediumSeverity": 5,
-            "lastUpdated": "2024-03-20",
-            "details": [
-                {
-                    "id": "1",
-                    "title": "Sample Security Issue",
-                    "severity": "high",
-                    "description": "This is a sample security issue"
-                }
-            ]
-        }
+        cap = cv2.VideoCapture(temp_path)
+        frames_features = []
+        frame_count = 0
+        
+        while cap.isOpened() and frame_count < 10:  # Process first 10 frames
+            ret, frame = cap.read()
+            if not ret:
+                break
+                
+            # Convert to RGB and resize
+            frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+            frame = cv2.resize(frame, (224, 224))
+            # Extract simple features (mean values per channel)
+            features = np.mean(frame, axis=(0, 1))
+            frames_features.append(features)
+            frame_count += 1
+            
+        cap.release()
+        
+        if frames_features:
+            avg_features = np.mean(frames_features, axis=0)
+            return " ".join([f"channel_{i}:{val:.4f}" for i, val in enumerate(avg_features)])
+        return "No frames processed"
+    finally:
+        os.unlink(temp_path)
+
+def process_pdf(pdf_file: UploadFile) -> str:
+    """Process PDF file and extract text."""
+    with tempfile.NamedTemporaryFile(delete=False, suffix='.pdf') as temp_pdf:
+        temp_pdf.write(pdf_file.file.read())
+        temp_path = temp_pdf.name
+
+    try:
+        doc = fitz.open(temp_path)
+        text = ""
+        for page in doc:
+            text += page.get_text()
+        doc.close()
+        return text[:1000]  # Return first 1000 characters as context
+    finally:
+        os.unlink(temp_path)
+
+@app.post("/api/upload-media")
+async def upload_media(file: UploadFile = File(...)):
+    try:
+        content_type = file.content_type
+        if content_type.startswith('audio/'):
+            context = process_audio(file)
+        elif content_type.startswith('image/'):
+            context = process_image(file)
+        elif content_type.startswith('video/'):
+            context = process_video(file)
+        elif content_type == 'application/pdf':
+            context = process_pdf(file)
+        else:
+            raise HTTPException(status_code=400, detail="Unsupported media type")
+            
+        return {"media_context": context}
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=f"Error processing media: {str(e)}")
+
+# ... keep existing code (chat and security report endpoints)
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)

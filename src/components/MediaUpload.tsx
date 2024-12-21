@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { Upload, Mic, Image, Video, FileText, Loader2 } from 'lucide-react';
+import { Upload, Image, Video, FileText, Loader2 } from 'lucide-react';
 import { Button } from './ui/button';
 import { useToast } from '@/hooks/use-toast';
+import { AudioRecorder } from './AudioRecorder';
 
 interface MediaUploadProps {
   onMediaContext: (context: { type: string; content: string }) => void;
@@ -48,6 +49,40 @@ export function MediaUpload({ onMediaContext }: MediaUploadProps) {
     }
   };
 
+  const handleAudioRecorded = async (audioBlob: Blob) => {
+    setIsUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append('file', audioBlob, 'recorded_audio.wav');
+
+      const response = await fetch('http://localhost:8000/api/upload-media', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error('Upload failed');
+      }
+
+      const data = await response.json();
+      onMediaContext({ type: 'audio/wav', content: data.media_context });
+      
+      toast({
+        title: "Audio processed successfully",
+        description: "Your recording has been processed and added to the context.",
+      });
+    } catch (error) {
+      console.error('Error processing audio:', error);
+      toast({
+        title: "Error processing audio",
+        description: "Failed to process recording. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
   return (
     <div className="flex items-center gap-2">
       <input
@@ -72,19 +107,10 @@ export function MediaUpload({ onMediaContext }: MediaUploadProps) {
           )}
         </Button>
       </label>
-      <Button
-        variant="outline"
-        size="icon"
-        disabled={isUploading}
-        onClick={() => {
-          toast({
-            title: "Coming soon",
-            description: "Live audio recording will be available in a future update.",
-          });
-        }}
-      >
-        <Mic className="h-4 w-4" />
-      </Button>
+      <AudioRecorder 
+        onAudioRecorded={handleAudioRecorded}
+        isProcessing={isUploading}
+      />
       <Button
         variant="outline"
         size="icon"
