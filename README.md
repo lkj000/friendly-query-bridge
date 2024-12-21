@@ -1,4 +1,4 @@
-# OKO Security Reports Extension for VS Code
+# OKO Extension for VS Code
 
 🛡️ Elevate your development workflow with real-time security insights and quality metrics, right where you code.
 
