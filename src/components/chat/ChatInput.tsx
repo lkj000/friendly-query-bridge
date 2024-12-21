@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Send } from 'lucide-react';
+import { VoiceInput } from './VoiceInput';
 
 interface ChatInputProps {
   onSendMessage: (message: string, mediaContext?: { type: string; content: string }) => void;
@@ -25,6 +26,10 @@ export const ChatInput: React.FC<ChatInputProps> = ({ onSendMessage, disabled })
     }
   };
 
+  const handleVoiceInput = (transcript: string) => {
+    setMessage(prev => prev + (prev ? ' ' : '') + transcript);
+  };
+
   return (
     <form onSubmit={handleSubmit} className="flex gap-2">
       <textarea
@@ -36,13 +41,16 @@ export const ChatInput: React.FC<ChatInputProps> = ({ onSendMessage, disabled })
         disabled={disabled}
         rows={1}
       />
-      <Button 
-        type="submit" 
-        disabled={!message.trim() || disabled}
-        className="h-[44px] px-4"
-      >
-        <Send className="h-4 w-4" />
-      </Button>
+      <div className="flex gap-2">
+        <VoiceInput onTranscript={handleVoiceInput} disabled={disabled} />
+        <Button 
+          type="submit" 
+          disabled={!message.trim() || disabled}
+          className="h-[44px] px-4"
+        >
+          <Send className="h-4 w-4" />
+        </Button>
+      </div>
     </form>
   );
 };
