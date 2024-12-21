@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Upload, Image, Video, FileText, Loader2 } from 'lucide-react';
+import { Upload, Image, Video, FileText, FileSpreadsheet, FileText as TextIcon, Loader2 } from 'lucide-react';
 import { Button } from './ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { AudioRecorder } from './AudioRecorder';
@@ -88,7 +88,7 @@ export function MediaUpload({ onMediaContext }: MediaUploadProps) {
       <input
         type="file"
         id="media-upload"
-        accept="image/*,audio/*,video/*,application/pdf"
+        accept="image/*,audio/*,video/*,application/pdf,text/plain,text/csv"
         className="hidden"
         onChange={handleFileUpload}
         disabled={isUploading}
@@ -140,6 +140,26 @@ export function MediaUpload({ onMediaContext }: MediaUploadProps) {
         }}
       >
         <FileText className="h-4 w-4" />
+      </Button>
+      <Button
+        variant="outline"
+        size="icon"
+        disabled={isUploading}
+        onClick={() => {
+          document.getElementById('media-upload')?.click();
+        }}
+      >
+        <TextIcon className="h-4 w-4" />
+      </Button>
+      <Button
+        variant="outline"
+        size="icon"
+        disabled={isUploading}
+        onClick={() => {
+          document.getElementById('media-upload')?.click();
+        }}
+      >
+        <FileSpreadsheet className="h-4 w-4" />
       </Button>
     </div>
   );

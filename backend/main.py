@@ -14,10 +14,23 @@ import os
 from PIL import Image
 import fitz  # PyMuPDF for PDF processing
 import cv2
+import pandas as pd
+import csv
+from io import StringIO
 
 app = FastAPI()
 
-# ... keep existing code (CORS configuration and model initialization)
+origins = ["http://localhost:3000"]  # Update with your frontend URL
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+processor = AutoProcessor.from_pretrained("your-processor")
+model = AutoModel.from_pretrained("your-model")
 
 def process_audio(audio_file: UploadFile) -> str:
     """Process audio file and extract features."""
@@ -107,6 +120,18 @@ def process_pdf(pdf_file: UploadFile) -> str:
     finally:
         os.unlink(temp_path)
 
+def process_text(text_file: UploadFile) -> str:
+    """Process text file and extract content."""
+    content = text_file.file.read().decode('utf-8')
+    return content[:1000]  # Return first 1000 characters as context
+
+def process_csv(csv_file: UploadFile) -> str:
+    """Process CSV file and extract summary."""
+    content = csv_file.file.read().decode('utf-8')
+    df = pd.read_csv(StringIO(content))
+    summary = f"CSV Summary:\nColumns: {', '.join(df.columns)}\nRows: {len(df)}\nSample data: {df.head(3).to_string()}"
+    return summary
+
 @app.post("/api/upload-media")
 async def upload_media(file: UploadFile = File(...)):
     try:
@@ -119,6 +144,10 @@ async def upload_media(file: UploadFile = File(...)):
             context = process_video(file)
         elif content_type == 'application/pdf':
             context = process_pdf(file)
+        elif content_type == 'text/plain':
+            context = process_text(file)
+        elif content_type == 'text/csv':
+            context = process_csv(file)
         else:
             raise HTTPException(status_code=400, detail="Unsupported media type")
             
@@ -126,7 +155,10 @@ async def upload_media(file: UploadFile = File(...)):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error processing media: {str(e)}")
 
-# ... keep existing code (chat and security report endpoints)
+@app.post("/api/chat")
+async def chat(message: str, media_context: Optional[str] = None):
+    # Implement chat logic here
+    return {"reply": "This is a placeholder response."}
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)
