@@ -1,9 +1,9 @@
 import { Send } from "lucide-react";
 import { useState } from "react";
-import { AudioUpload } from "./AudioUpload";
+import { MediaUpload } from "./MediaUpload";
 
 interface ChatInputProps {
-  onSend: (message: string, code?: string, languageId?: string, audioContext?: string) => void;
+  onSend: (message: string, code?: string, languageId?: string, mediaContext?: { type: string; content: string }) => void;
   disabled?: boolean;
 }
 
@@ -12,16 +12,16 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
   const [code, setCode] = useState("");
   const [languageId, setLanguageId] = useState("");
   const [showCodeInput, setShowCodeInput] = useState(false);
-  const [audioContext, setAudioContext] = useState<string | undefined>();
+  const [mediaContext, setMediaContext] = useState<{ type: string; content: string } | undefined>();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (message.trim()) {
-      onSend(message, code, languageId, audioContext);
+      onSend(message, code, languageId, mediaContext);
       setMessage("");
       setCode("");
       setLanguageId("");
-      setAudioContext(undefined);
+      setMediaContext(undefined);
       setShowCodeInput(false);
     }
   };
@@ -38,7 +38,7 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
             className="flex-1 px-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary/20 transition-shadow"
             disabled={disabled}
           />
-          <AudioUpload onAudioContext={setAudioContext} />
+          <MediaUpload onMediaContext={setMediaContext} />
           <button
             type="button"
             onClick={() => setShowCodeInput(!showCodeInput)}
