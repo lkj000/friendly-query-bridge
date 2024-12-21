@@ -29,6 +29,13 @@ serve(async (req) => {
       throw new Error('Missing JIRA credentials');
     }
 
+    // Log credentials (without sensitive data)
+    console.log('JIRA Configuration:', {
+      email: jiraEmail,
+      domain: jiraDomain,
+      hasToken: !!jiraApiToken
+    });
+
     const { summary, description, severity, source, filePath, lineNumber }: CreateTicketPayload = await req.json();
 
     console.log('Creating JIRA ticket with payload:', { summary, severity, source });
@@ -43,8 +50,9 @@ ${lineNumber ? `*Line:* ${lineNumber}` : ''}
 ${description}
     `;
 
-    // Construct the JIRA API URL properly
-    const jiraUrl = `https://${jiraDomain}.atlassian.net/rest/api/3/issue`;
+    // Clean up domain (remove any trailing slashes and ensure no API token is present)
+    const cleanDomain = jiraDomain.replace(/[\/]+$/, '').split('/')[0];
+    const jiraUrl = `https://${cleanDomain}/rest/api/3/issue`;
     
     console.log('Sending request to JIRA API:', jiraUrl);
 
@@ -91,7 +99,11 @@ ${description}
     const data = await response.json();
 
     if (!response.ok) {
-      console.error('JIRA API Error:', data);
+      console.error('JIRA API Error Response:', {
+        status: response.status,
+        statusText: response.statusText,
+        data
+      });
       throw new Error(data.message || 'Failed to create JIRA ticket');
     }
 
