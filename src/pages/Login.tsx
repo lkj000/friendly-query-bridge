@@ -14,6 +14,18 @@ export function Login() {
     if (user) {
       navigate("/");
     }
+
+    // Listen for auth state changes to show error messages
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session?.user) {
+        navigate("/");
+      }
+    });
+
+    // Cleanup subscription on unmount
+    return () => subscription.unsubscribe();
   }, [user, navigate]);
 
   return (
@@ -34,13 +46,6 @@ export function Login() {
           }}
           theme="light"
           providers={[]}
-          onError={(error) => {
-            toast({
-              title: "Authentication Error",
-              description: error.message,
-              variant: "destructive",
-            });
-          }}
         />
       </div>
     </div>
