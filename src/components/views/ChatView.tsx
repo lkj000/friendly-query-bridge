@@ -1,69 +1,144 @@
 import React, { useState, useEffect } from 'react';
-import { MessageList } from '@/components/chat/MessageList';
-import { ChatHeader } from '@/components/chat/ChatHeader';
-import { ChatSidebar } from '@/components/chat/ChatSidebar';
-import { ChatInputSection } from '@/components/chat/ChatInputSection';
-import { useAuth } from '@/contexts/AuthContext';
-import { useToast } from '@/hooks/use-toast';
-import { useConversations } from '@/hooks/useConversations';
-import { useMessages } from '@/hooks/useMessages';
 import { DefaultMessageHandler } from '@/services/messageHandler';
+import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
+import { MessageList } from '@/components/chat/MessageList';
+import { ChatInput } from '@/components/chat/ChatInput';
+import { Button } from '@/components/ui/button';
+import { PlusCircle } from 'lucide-react';
 
 interface ChatViewProps {
-  messageHandler?: DefaultMessageHandler;
+  messageHandler: DefaultMessageHandler;
 }
 
 export const ChatView: React.FC<ChatViewProps> = ({ messageHandler }) => {
-  const [currentConversation, setCurrentConversation] = useState<string | null>(null);
+  const [messages, setMessages] = useState<any[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
-  const { user } = useAuth();
   const { toast } = useToast();
-  
-  const { 
-    conversations, 
-    createNewConversation,
-    isLoading: isLoadingConversations 
-  } = useConversations();
-
-  const {
-    messages,
-    sendMessage,
-    isLoading: isLoadingMessages
-  } = useMessages(currentConversation);
+  const { user } = useAuth();
 
   useEffect(() => {
-    if (conversations.length > 0 && !currentConversation) {
-      setCurrentConversation(conversations[0].id);
+    if (user) {
+      fetchMessages();
+      const channel = subscribeToMessages();
+      return () => {
+        channel.unsubscribe();
+      };
     }
-  }, [conversations, currentConversation]);
+  }, [user]);
 
-  const handleNewChat = async () => {
-    const conversation = await createNewConversation();
-    if (conversation) {
-      setCurrentConversation(conversation.id);
+  const fetchMessages = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('messages')
+        .select('*')
+        .order('created_at', { ascending: true });
+
+      if (error) throw error;
+      setMessages(data || []);
+    } catch (error) {
+      console.error('Error fetching messages:', error);
+      toast({
+        title: "Error fetching messages",
+        description: "Could not load messages. Please refresh the page.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const subscribeToMessages = () => {
+    const channel = supabase
+      .channel('messages')
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'messages' },
+        (payload) => {
+          console.log('New message received:', payload);
+          setMessages(prev => [...prev, payload.new]);
+        }
+      )
+      .subscribe();
+
+    return channel;
+  };
+
+  const handleNewChat = () => {
+    setMessages([]);
+    toast({
+      title: "New Chat Started",
+      description: "You can now start a fresh conversation.",
+    });
+  };
+
+  const handleSendMessage = async (message: string, mediaContext?: { type: string; content: string }) => {
+    if (!message.trim() && !mediaContext) return;
+
+    setIsProcessing(true);
+    try {
+      const { data: userMessage, error: insertError } = await supabase
+        .from('messages')
+        .insert({
+          content: message,
+          user_id: user?.id,
+          media_context: mediaContext || null,
+          is_bot: false
+        })
+        .select()
+        .maybeSingle();
+
+      if (insertError) throw insertError;
+
+      const response = await messageHandler.sendChatMessage(message);
+      
+      const { data: botMessage, error: botError } = await supabase
+        .from('messages')
+        .insert({
+          content: response,
+          user_id: user?.id,
+          is_bot: true
+        })
+        .select()
+        .maybeSingle();
+
+      if (botError) throw botError;
+
+      if (userMessage && botMessage) {
+        setMessages(prev => [...prev, userMessage, botMessage]);
+      }
+    } catch (error) {
+      console.error('Error in chat interaction:', error);
+      toast({
+        title: "Error sending message",
+        description: "Could not send message. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsProcessing(false);
     }
   };
 
   return (
     <div className="flex flex-col h-full bg-background">
-      <ChatHeader onNewChat={handleNewChat} />
-      <div className="flex flex-1 overflow-hidden">
-        <ChatSidebar
-          conversations={conversations}
-          currentConversation={currentConversation}
-          onConversationSelect={setCurrentConversation}
-          isLoading={isLoadingConversations}
-        />
-        <div className="flex-1 flex flex-col">
-          <div className="flex-1 overflow-hidden">
-            <MessageList 
-              messages={messages} 
-              isLoading={isLoadingMessages}
-            />
-          </div>
-          <ChatInputSection 
-            onSendMessage={sendMessage}
-            disabled={isProcessing || !currentConversation}
+      <div className="flex justify-between items-center p-4 border-b">
+        <h2 className="text-xl font-semibold text-primary">AskMe</h2>
+        <Button
+          onClick={handleNewChat}
+          variant="outline"
+          className="gap-2 hover:bg-secondary"
+        >
+          <PlusCircle className="h-4 w-4" />
+          New Chat
+        </Button>
+      </div>
+      <div className="flex-1 overflow-hidden">
+        <MessageList messages={messages} />
+      </div>
+      <div className="border-t bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+        <div className="max-w-3xl mx-auto p-4">
+          <ChatInput 
+            onSendMessage={handleSendMessage}
+            disabled={isProcessing}
           />
         </div>
       </div>

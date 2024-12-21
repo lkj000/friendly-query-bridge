@@ -1,13 +1,21 @@
 import React, { useEffect, useRef } from 'react';
-import { ChatMessage } from './ChatMessage';
-import { ConversationMessage } from '@/integrations/supabase/types/conversations';
+import { Card } from '@/components/ui/card';
+import { cn } from '@/lib/utils';
 
-interface MessageListProps {
-  messages: ConversationMessage[];
-  isLoading?: boolean;
+interface Message {
+  content: string;
+  is_bot: boolean;
+  media_context?: {
+    type: string;
+    content: string;
+  };
 }
 
-export const MessageList: React.FC<MessageListProps> = ({ messages, isLoading }) => {
+interface MessageListProps {
+  messages: Message[];
+}
+
+export const MessageList: React.FC<MessageListProps> = ({ messages }) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -18,30 +26,85 @@ export const MessageList: React.FC<MessageListProps> = ({ messages, isLoading })
     scrollToBottom();
   }, [messages]);
 
-  if (isLoading) {
+  const renderMedia = (message: Message) => {
+    if (!message.media_context) return null;
+    const { type, content } = message.media_context;
+
+    if (type.startsWith('image/')) {
+      return <img src={content} alt="Uploaded content" className="max-w-full h-auto rounded-lg" />;
+    }
+
+    if (type.startsWith('video/')) {
+      return (
+        <video controls className="max-w-full rounded-lg">
+          <source src={content} type={type} />
+          Your browser does not support the video tag.
+        </video>
+      );
+    }
+
+    if (type.startsWith('audio/')) {
+      return (
+        <audio controls className="w-full">
+          <source src={content} type={type} />
+          Your browser does not support the audio tag.
+        </audio>
+      );
+    }
+
+    if (type === 'application/pdf') {
+      return (
+        <iframe
+          src={content}
+          className="w-full h-96 rounded-lg"
+          title="PDF document"
+        />
+      );
+    }
+
     return (
-      <div className="flex-1 overflow-y-auto px-4 py-6">
-        <div className="max-w-3xl mx-auto space-y-6">
-          <div className="animate-pulse space-y-4">
-            <div className="h-10 bg-secondary rounded-lg w-3/4" />
-            <div className="h-10 bg-secondary rounded-lg w-1/2" />
-            <div className="h-10 bg-secondary rounded-lg w-2/3" />
-          </div>
-        </div>
-      </div>
+      <Card className="p-4">
+        <a 
+          href={content} 
+          target="_blank" 
+          rel="noopener noreferrer" 
+          className="text-blue-500 hover:underline flex items-center gap-2"
+        >
+          View uploaded file
+        </a>
+      </Card>
     );
-  }
+  };
 
   return (
     <div className="flex-1 overflow-y-auto px-4 py-6 space-y-6">
       <div className="max-w-3xl mx-auto space-y-6">
         {messages.map((message, index) => (
-          <ChatMessage
+          <div
             key={index}
-            content={message.content}
-            isUser={!message.is_bot}
-            mediaContext={message.media_context}
-          />
+            className={cn(
+              "flex",
+              message.is_bot ? "justify-start" : "justify-end"
+            )}
+          >
+            <div
+              className={cn(
+                "max-w-[85%] px-4 py-3 rounded-lg break-words",
+                message.is_bot 
+                  ? "bg-secondary text-secondary-foreground" 
+                  : "bg-primary text-primary-foreground"
+              )}
+            >
+              <div className="prose dark:prose-invert">
+                {message.content}
+              </div>
+              {message.media_context && (
+                <div className="mt-2">
+                  {renderMedia(message)}
+                </div>
+              )}
+            </div>
+          </div>
         ))}
       </div>
       <div ref={messagesEndRef} />

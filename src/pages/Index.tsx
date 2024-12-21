@@ -4,6 +4,7 @@ import { ReportView } from "@/components/views/ReportView";
 import { VulnerabilityView } from "@/components/views/VulnerabilityView";
 import { ApiIntegrationsView } from "@/components/views/ApiIntegrationsView";
 import { DashboardView } from "@/components/views/DashboardView";
+import { DefaultMessageHandler } from "@/services/messageHandler";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -12,6 +13,7 @@ import { toast } from "@/hooks/use-toast";
 
 export function Index() {
   const [activeView, setActiveView] = useState('chat');
+  const messageHandler = DefaultMessageHandler.getInstance();
   const { user } = useAuth();
 
   const { data: totalIncidents } = useQuery({
@@ -44,7 +46,7 @@ export function Index() {
       
       <div className="flex-1">
         {activeView === 'dashboard' && <DashboardView />}
-        {activeView === 'chat' && <ChatView />}
+        {activeView === 'chat' && <ChatView messageHandler={messageHandler} />}
         {activeView === 'vulnerabilities' && <VulnerabilityView />}
         {activeView === 'veracode' && (
           <ReportView type="veracode" title="Veracode Security Report" />
