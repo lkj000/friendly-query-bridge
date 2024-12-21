@@ -1,6 +1,6 @@
-import { SupabaseClient } from '@supabase/supabase-js';
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
-export async function getIncidentTrendsResponse(supabase: SupabaseClient) {
+export async function getIncidentTrendsResponse(supabase: any) {
   console.log('Fetching incident trends data...');
   
   const { data: totalIncidents, error: totalError } = await supabase
@@ -57,7 +57,7 @@ export async function getIncidentTrendsResponse(supabase: SupabaseClient) {
   return response;
 }
 
-export async function getMajorIncidentsResponse(supabase: SupabaseClient) {
+export async function getMajorIncidentsResponse(supabase: any) {
   console.log('Fetching major incidents data...');
   
   const tables = ['accepted', 'rejected', 'canceled'];

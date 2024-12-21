@@ -1,6 +1,6 @@
-import { SupabaseClient } from '@supabase/supabase-js';
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
-export async function getSecurityResponse(supabase: SupabaseClient) {
+export async function getSecurityResponse(supabase: any) {
   console.log('Fetching vulnerability data...');
   
   const { data: vulns, error } = await supabase
