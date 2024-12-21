@@ -39,6 +39,30 @@ export type Database = {
         }
         Relationships: []
       }
+      conversations: {
+        Row: {
+          created_at: string
+          id: string
+          last_message_at: string
+          title: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          last_message_at?: string
+          title?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          last_message_at?: string
+          title?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       incidents_caused_by_change: {
         Row: {
           count: number | null
@@ -228,6 +252,7 @@ export type Database = {
       messages: {
         Row: {
           content: string
+          conversation_id: string | null
           created_at: string
           id: string
           is_bot: boolean | null
@@ -236,6 +261,7 @@ export type Database = {
         }
         Insert: {
           content: string
+          conversation_id?: string | null
           created_at?: string
           id?: string
           is_bot?: boolean | null
@@ -244,13 +270,22 @@ export type Database = {
         }
         Update: {
           content?: string
+          conversation_id?: string | null
           created_at?: string
           id?: string
           is_bot?: boolean | null
           media_context?: Json | null
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "messages_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profiles: {
         Row: {

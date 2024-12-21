@@ -1,18 +1,10 @@
 import React, { useEffect, useRef } from 'react';
 import { Card } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
-
-interface Message {
-  content: string;
-  is_bot: boolean;
-  media_context?: {
-    type: string;
-    content: string;
-  };
-}
+import { ConversationMessage } from '@/integrations/supabase/types/conversations';
 
 interface MessageListProps {
-  messages: Message[];
+  messages: ConversationMessage[];
 }
 
 export const MessageList: React.FC<MessageListProps> = ({ messages }) => {
@@ -26,7 +18,7 @@ export const MessageList: React.FC<MessageListProps> = ({ messages }) => {
     scrollToBottom();
   }, [messages]);
 
-  const renderMedia = (message: Message) => {
+  const renderMedia = (message: ConversationMessage) => {
     if (!message.media_context) return null;
     const { type, content } = message.media_context;
 

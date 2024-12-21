@@ -7,6 +7,8 @@ import { MessageList } from '@/components/chat/MessageList';
 import { ChatInput } from '@/components/chat/ChatInput';
 import { Button } from '@/components/ui/button';
 import { PlusCircle } from 'lucide-react';
+import { Conversation } from '@/integrations/supabase/types/conversations';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 interface ChatViewProps {
   messageHandler: DefaultMessageHandler;
@@ -14,13 +16,15 @@ interface ChatViewProps {
 
 export const ChatView: React.FC<ChatViewProps> = ({ messageHandler }) => {
   const [messages, setMessages] = useState<any[]>([]);
+  const [conversations, setConversations] = useState<Conversation[]>([]);
+  const [currentConversation, setCurrentConversation] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const { toast } = useToast();
   const { user } = useAuth();
 
   useEffect(() => {
     if (user) {
-      fetchMessages();
+      fetchConversations();
       const channel = subscribeToMessages();
       return () => {
         channel.unsubscribe();
@@ -28,11 +32,40 @@ export const ChatView: React.FC<ChatViewProps> = ({ messageHandler }) => {
     }
   }, [user]);
 
-  const fetchMessages = async () => {
+  useEffect(() => {
+    if (currentConversation) {
+      fetchMessages(currentConversation);
+    }
+  }, [currentConversation]);
+
+  const fetchConversations = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('conversations')
+        .select('*')
+        .order('last_message_at', { ascending: false });
+
+      if (error) throw error;
+      setConversations(data || []);
+      if (data && data.length > 0 && !currentConversation) {
+        setCurrentConversation(data[0].id);
+      }
+    } catch (error) {
+      console.error('Error fetching conversations:', error);
+      toast({
+        title: "Error fetching conversations",
+        description: "Could not load conversations. Please refresh the page.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const fetchMessages = async (conversationId: string) => {
     try {
       const { data, error } = await supabase
         .from('messages')
         .select('*')
+        .eq('conversation_id', conversationId)
         .order('created_at', { ascending: true });
 
       if (error) throw error;
@@ -54,8 +87,9 @@ export const ChatView: React.FC<ChatViewProps> = ({ messageHandler }) => {
         'postgres_changes',
         { event: 'INSERT', schema: 'public', table: 'messages' },
         (payload) => {
-          console.log('New message received:', payload);
-          setMessages(prev => [...prev, payload.new]);
+          if (payload.new.conversation_id === currentConversation) {
+            setMessages(prev => [...prev, payload.new]);
+          }
         }
       )
       .subscribe();
@@ -63,16 +97,42 @@ export const ChatView: React.FC<ChatViewProps> = ({ messageHandler }) => {
     return channel;
   };
 
-  const handleNewChat = () => {
-    setMessages([]);
-    toast({
-      title: "New Chat Started",
-      description: "You can now start a fresh conversation.",
-    });
+  const handleNewChat = async () => {
+    try {
+      const { data: conversation, error } = await supabase
+        .from('conversations')
+        .insert({
+          user_id: user?.id,
+          title: 'New Conversation'
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      setConversations(prev => [conversation, ...prev]);
+      setCurrentConversation(conversation.id);
+      setMessages([]);
+      
+      toast({
+        title: "New Chat Started",
+        description: "You can now start a fresh conversation.",
+      });
+    } catch (error) {
+      console.error('Error creating new conversation:', error);
+      toast({
+        title: "Error creating conversation",
+        description: "Could not create new conversation. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleSendMessage = async (message: string, mediaContext?: { type: string; content: string }) => {
     if (!message.trim() && !mediaContext) return;
+    if (!currentConversation) {
+      await handleNewChat();
+    }
 
     setIsProcessing(true);
     try {
@@ -82,7 +142,8 @@ export const ChatView: React.FC<ChatViewProps> = ({ messageHandler }) => {
           content: message,
           user_id: user?.id,
           media_context: mediaContext || null,
-          is_bot: false
+          is_bot: false,
+          conversation_id: currentConversation
         })
         .select()
         .maybeSingle();
@@ -96,16 +157,20 @@ export const ChatView: React.FC<ChatViewProps> = ({ messageHandler }) => {
         .insert({
           content: response,
           user_id: user?.id,
-          is_bot: true
+          is_bot: true,
+          conversation_id: currentConversation
         })
         .select()
         .maybeSingle();
 
       if (botError) throw botError;
 
-      if (userMessage && botMessage) {
-        setMessages(prev => [...prev, userMessage, botMessage]);
-      }
+      // Update conversation's last_message_at
+      await supabase
+        .from('conversations')
+        .update({ last_message_at: new Date().toISOString() })
+        .eq('id', currentConversation);
+
     } catch (error) {
       console.error('Error in chat interaction:', error);
       toast({
@@ -131,15 +196,31 @@ export const ChatView: React.FC<ChatViewProps> = ({ messageHandler }) => {
           New Chat
         </Button>
       </div>
-      <div className="flex-1 overflow-hidden">
-        <MessageList messages={messages} />
-      </div>
-      <div className="border-t bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="max-w-3xl mx-auto p-4">
-          <ChatInput 
-            onSendMessage={handleSendMessage}
-            disabled={isProcessing}
-          />
+      <div className="flex flex-1 overflow-hidden">
+        <ScrollArea className="w-64 border-r p-4">
+          {conversations.map((conv) => (
+            <Button
+              key={conv.id}
+              variant={currentConversation === conv.id ? 'default' : 'ghost'}
+              className="w-full justify-start mb-2"
+              onClick={() => setCurrentConversation(conv.id)}
+            >
+              {conv.title || 'Untitled Chat'}
+            </Button>
+          ))}
+        </ScrollArea>
+        <div className="flex-1 flex flex-col">
+          <div className="flex-1 overflow-hidden">
+            <MessageList messages={messages} />
+          </div>
+          <div className="border-t bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+            <div className="max-w-3xl mx-auto p-4">
+              <ChatInput 
+                onSendMessage={handleSendMessage}
+                disabled={isProcessing}
+              />
+            </div>
+          </div>
         </div>
       </div>
     </div>
