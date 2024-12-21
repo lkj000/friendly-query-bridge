@@ -2,6 +2,7 @@ import { OkoSidebar } from "@/components/sidebar/OkoSidebar";
 import { ChatView } from "@/components/views/ChatView";
 import { ReportView } from "@/components/views/ReportView";
 import { VulnerabilityView } from "@/components/views/VulnerabilityView";
+import { ApiIntegrationsView } from "@/components/views/ApiIntegrationsView";
 import { DefaultMessageHandler } from "@/services/messageHandler";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
@@ -54,6 +55,7 @@ export function Index() {
         {activeView === 'prisma' && (
           <ReportView type="prisma" title="Prisma Cloud Security Report" />
         )}
+        {activeView === 'api-integrations' && <ApiIntegrationsView />}
       </div>
     </div>
   );

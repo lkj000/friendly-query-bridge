@@ -1,6 +1,6 @@
 import React from 'react';
 import { Button } from "@/components/ui/button";
-import { MessageSquare, Shield, Bug, Lock, AlertTriangle } from "lucide-react";
+import { MessageSquare, Shield, Bug, Lock, AlertTriangle, Network } from "lucide-react";
 
 interface OkoSidebarNavProps {
   activeView: string;
@@ -53,6 +53,15 @@ export function OkoSidebarNav({ activeView, onViewChange }: OkoSidebarNavProps) 
       >
         <Lock className="mr-2 h-4 w-4" />
         Prisma Report
+      </Button>
+
+      <Button
+        variant={activeView === 'api-integrations' ? 'default' : 'ghost'}
+        className="w-full justify-start"
+        onClick={() => onViewChange('api-integrations')}
+      >
+        <Network className="mr-2 h-4 w-4" />
+        API Integrations
       </Button>
     </nav>
   );
