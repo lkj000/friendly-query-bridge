@@ -1,4 +1,4 @@
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 export async function getApiIntegrationResponse(supabase: any) {
   console.log('Fetching API integration status...');
@@ -10,6 +10,10 @@ export async function getApiIntegrationResponse(supabase: any) {
   if (error) {
     console.error('Error fetching API integrations:', error);
     return "Sorry, I couldn't fetch the API integration status.";
+  }
+
+  if (!integrations || integrations.length === 0) {
+    return "No API integrations found in the system.";
   }
 
   const activeCount = integrations.filter((i: any) => i.is_active).length;

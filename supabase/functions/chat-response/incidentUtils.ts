@@ -1,11 +1,11 @@
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 export async function getIncidentTrendsResponse(supabase: any) {
   console.log('Fetching incident trends data...');
   
   const { data: totalIncidents, error: totalError } = await supabase
     .from('total_incidents')
-    .select('count')
+    .select('*')
     .maybeSingle();
   
   if (totalError) {
@@ -30,7 +30,8 @@ export async function getIncidentTrendsResponse(supabase: any) {
       .from(table)
       .select('count')
       .order('month_year', { ascending: false })
-      .limit(1);
+      .limit(1)
+      .maybeSingle();
 
     if (error) {
       console.error(`Error fetching ${table}:`, error);
@@ -38,7 +39,7 @@ export async function getIncidentTrendsResponse(supabase: any) {
     }
 
     const stateName = table.replace('incidentstatedata_', '');
-    stateData[stateName] = data?.[0]?.count || 0;
+    stateData[stateName] = data?.count || 0;
   }
 
   const response = [
@@ -68,17 +69,22 @@ export async function getMajorIncidentsResponse(supabase: any) {
       .from(`majorincidentdata_${status}`)
       .select('count')
       .order('month_year', { ascending: false })
-      .limit(1);
+      .limit(1)
+      .maybeSingle();
 
     if (error) {
       console.error(`Error fetching major incidents (${status}):`, error);
       continue;
     }
 
-    majorIncidents[status] = data?.[0]?.count || 0;
+    majorIncidents[status] = data?.count || 0;
   }
 
   const total = Object.values(majorIncidents).reduce((a, b) => a + b, 0);
+  
+  if (total === 0) {
+    return "No major incidents found in the system.";
+  }
   
   const response = [
     '🚨 Major Incidents Summary:\n',

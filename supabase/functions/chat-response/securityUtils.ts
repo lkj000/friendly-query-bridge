@@ -1,4 +1,4 @@
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 export async function getSecurityResponse(supabase: any) {
   console.log('Fetching vulnerability data...');
@@ -11,6 +11,10 @@ export async function getSecurityResponse(supabase: any) {
   if (error) {
     console.error('Error fetching vulnerabilities:', error);
     return "Sorry, I couldn't fetch the vulnerability data.";
+  }
+
+  if (!vulns || vulns.length === 0) {
+    return "No security vulnerabilities found in the system.";
   }
 
   const severityCounts = vulns.reduce((acc: any, curr: any) => {
