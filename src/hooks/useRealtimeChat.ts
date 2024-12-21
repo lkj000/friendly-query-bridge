@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from './use-toast';
 import { RealtimePresenceState } from '@supabase/supabase-js';
@@ -17,7 +17,14 @@ export const useRealtimeChat = () => {
     const channel = supabase.channel('chat_room')
       .on('presence', { event: 'sync' }, () => {
         const state = channel.presenceState<ChatPresence>();
-        setTypingUsers(prevState => ({ ...prevState, ...state }));
+        const formattedState = Object.entries(state).reduce((acc, [key, value]) => {
+          // Ensure we're getting the first presence state if it's an array
+          const presenceData = Array.isArray(value) ? value[0] : value;
+          acc[key] = presenceData;
+          return acc;
+        }, {} as Record<string, ChatPresence>);
+        
+        setTypingUsers(formattedState);
       })
       .on('presence', { event: 'join' }, ({ key, newPresences }) => {
         console.log('User joined:', key, newPresences);
