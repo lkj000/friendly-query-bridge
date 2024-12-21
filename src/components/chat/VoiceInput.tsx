@@ -10,7 +10,7 @@ interface VoiceInputProps {
 
 export const VoiceInput: React.FC<VoiceInputProps> = ({ onTranscript, disabled }) => {
   const [isListening, setIsListening] = useState(false);
-  const [recognition, setRecognition] = useState<SpeechRecognition | null>(null);
+  const [recognition, setRecognition] = useState<typeof window.SpeechRecognition | null>(null);
   const { toast } = useToast();
 
   const startListening = useCallback(() => {
@@ -25,12 +25,12 @@ export const VoiceInput: React.FC<VoiceInputProps> = ({ onTranscript, disabled }
         return;
       }
 
-      const recognition = new SpeechRecognition();
-      recognition.continuous = true;
-      recognition.interimResults = true;
-      recognition.lang = 'en-US';
+      const recognitionInstance = new SpeechRecognition();
+      recognitionInstance.continuous = true;
+      recognitionInstance.interimResults = true;
+      recognitionInstance.lang = 'en-US';
 
-      recognition.onresult = (event) => {
+      recognitionInstance.onresult = (event) => {
         const transcript = Array.from(event.results)
           .map(result => result[0])
           .map(result => result.transcript)
@@ -42,7 +42,7 @@ export const VoiceInput: React.FC<VoiceInputProps> = ({ onTranscript, disabled }
         }
       };
 
-      recognition.onerror = (event) => {
+      recognitionInstance.onerror = (event) => {
         console.error('Speech recognition error:', event.error);
         toast({
           title: "Error",
@@ -52,8 +52,8 @@ export const VoiceInput: React.FC<VoiceInputProps> = ({ onTranscript, disabled }
         stopListening();
       };
 
-      recognition.start();
-      setRecognition(recognition);
+      recognitionInstance.start();
+      setRecognition(recognitionInstance);
       setIsListening(true);
       
       toast({
