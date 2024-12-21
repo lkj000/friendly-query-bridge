@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
-import { DefaultMessageHandler, MessageHandler } from '../../services/messageHandler';
+import { DefaultMessageHandler } from '../../services/messageHandler';
 import { useToast } from '@/hooks/use-toast';
 import { MessageList } from '../chat/MessageList';
 import { ChatInput } from '../chat/ChatInput';
 
 interface ChatViewProps {
-  messageHandler?: MessageHandler;
+  messageHandler?: DefaultMessageHandler;
 }
 
 interface Message {
@@ -15,7 +15,9 @@ interface Message {
   mediaType?: string;
 }
 
-export const ChatView: React.FC<ChatViewProps> = ({ messageHandler = DefaultMessageHandler.getInstance() }) => {
+export const ChatView: React.FC<ChatViewProps> = ({ 
+  messageHandler = DefaultMessageHandler.getInstance() 
+}) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const { toast } = useToast();
 
@@ -46,7 +48,7 @@ export const ChatView: React.FC<ChatViewProps> = ({ messageHandler = DefaultMess
   };
 
   return (
-    <div className="flex flex-col h-full p-4">
+    <div className="flex flex-col h-full">
       <MessageList messages={messages} />
       <ChatInput onSendMessage={handleSendMessage} />
     </div>

@@ -11,7 +11,7 @@ interface MessageListProps {
   messages: Message[];
 }
 
-export const MessageList = ({ messages }: MessageListProps) => {
+export const MessageList: React.FC<MessageListProps> = ({ messages }) => {
   const renderMedia = (message: Message) => {
     if (!message.mediaUrl) return null;
 
@@ -32,8 +32,25 @@ export const MessageList = ({ messages }: MessageListProps) => {
             Your browser does not support the audio tag.
           </audio>
         );
+      case 'pdf':
+        return (
+          <iframe
+            src={message.mediaUrl}
+            className="w-full h-96 rounded-lg"
+            title="PDF document"
+          />
+        );
       default:
-        return <a href={message.mediaUrl} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">View uploaded file</a>;
+        return (
+          <a 
+            href={message.mediaUrl} 
+            target="_blank" 
+            rel="noopener noreferrer" 
+            className="text-blue-500 hover:underline"
+          >
+            View uploaded file
+          </a>
+        );
     }
   };
 
@@ -42,12 +59,16 @@ export const MessageList = ({ messages }: MessageListProps) => {
       {messages.map((message, index) => (
         <div
           key={index}
-          className={`p-2 rounded-lg ${
+          className={`p-4 rounded-lg ${
             message.isUser ? 'bg-primary text-primary-foreground ml-auto' : 'bg-secondary'
-          }`}
+          } max-w-[80%]`}
         >
-          {message.content}
-          {renderMedia(message)}
+          <div className="break-words">{message.content}</div>
+          {message.mediaUrl && (
+            <div className="mt-2">
+              {renderMedia(message)}
+            </div>
+          )}
         </div>
       ))}
     </div>
