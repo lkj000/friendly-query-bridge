@@ -25,17 +25,18 @@ serve(async (req) => {
     const jiraApiToken = Deno.env.get('JIRA_API_TOKEN');
     const jiraDomain = Deno.env.get('JIRA_DOMAIN');
 
-    // Validate environment variables
+    // Validate environment variables with detailed logging
     if (!jiraEmail || !jiraApiToken || !jiraDomain) {
-      console.error('Missing JIRA credentials:', {
-        hasEmail: !!jiraEmail,
-        hasToken: !!jiraApiToken,
-        hasDomain: !!jiraDomain
-      });
-      throw new Error('Missing JIRA credentials');
+      const missingVars = {
+        email: !jiraEmail,
+        token: !jiraApiToken,
+        domain: !jiraDomain
+      };
+      console.error('Missing JIRA credentials:', missingVars);
+      throw new Error(`Missing JIRA credentials: ${JSON.stringify(missingVars)}`);
     }
 
-    // Clean up domain
+    // Clean up domain and log it
     const cleanDomain = jiraDomain.replace(/[\/]+$/, '').split('/')[0];
     console.log('Using JIRA domain:', cleanDomain);
 
@@ -60,10 +61,10 @@ ${description}
     `;
 
     const jiraUrl = `https://${cleanDomain}/rest/api/3/issue`;
-    console.log('Sending request to JIRA API:', jiraUrl);
+    console.log('JIRA API URL:', jiraUrl);
 
     const authToken = btoa(`${jiraEmail}:${jiraApiToken}`);
-    console.log('Auth token generated (length):', authToken.length);
+    console.log('Auth token generated successfully');
 
     const requestBody = {
       fields: {
@@ -97,7 +98,7 @@ ${description}
       }
     };
 
-    console.log('Request body:', JSON.stringify(requestBody, null, 2));
+    console.log('Sending request to JIRA with body:', JSON.stringify(requestBody, null, 2));
 
     const response = await fetch(jiraUrl, {
       method: 'POST',
@@ -110,14 +111,14 @@ ${description}
     });
 
     const responseText = await response.text();
-    console.log('Raw response:', responseText);
+    console.log('Raw JIRA API response:', responseText);
 
     let responseData;
     try {
       responseData = JSON.parse(responseText);
     } catch (e) {
-      console.error('Failed to parse response:', e);
-      responseData = { error: 'Invalid JSON response' };
+      console.error('Failed to parse JIRA response:', e);
+      throw new Error(`Invalid JSON response from JIRA: ${responseText}`);
     }
 
     if (!response.ok) {
@@ -127,7 +128,12 @@ ${description}
         data: responseData,
         headers: Object.fromEntries(response.headers.entries())
       });
-      throw new Error(responseData.message || responseData.errorMessages?.[0] || 'Failed to create JIRA ticket');
+      
+      const errorMessage = responseData.errorMessages?.[0] || 
+                          responseData.message || 
+                          `JIRA API error: ${response.status} ${response.statusText}`;
+      
+      throw new Error(errorMessage);
     }
 
     console.log('JIRA ticket created successfully:', responseData);
@@ -138,12 +144,18 @@ ${description}
     });
 
   } catch (error) {
-    console.error('Error in create-jira-ticket function:', error);
+    console.error('Detailed error in create-jira-ticket function:', {
+      message: error.message,
+      stack: error.stack,
+      cause: error.cause
+    });
+
     return new Response(
       JSON.stringify({ 
         error: error.message,
         details: error.toString(),
-        stack: error.stack
+        stack: error.stack,
+        timestamp: new Date().toISOString()
       }), 
       { 
         status: 500,
