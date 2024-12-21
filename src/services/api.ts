@@ -60,12 +60,10 @@ export const api = {
   async fetchSecurityReport(type: 'veracode' | 'sonar' | 'prisma'): Promise<ApiResponse<SecurityReport>> {
     try {
       if (vscode) {
-        // Handle VS Code extension communication
         vscode.postMessage({
           type: 'fetchReport',
           payload: { type }
         });
-        // Return mock data for now
         return {
           data: {
             highSeverity: 0,
@@ -92,15 +90,13 @@ export const api = {
     }
   },
 
-  async sendChatMessage(message: string): Promise<ApiResponse<ChatResponse>> {
+  async sendChatMessage(message: string, audioContext?: string): Promise<ApiResponse<ChatResponse>> {
     try {
       if (vscode) {
-        // Handle VS Code extension communication
         vscode.postMessage({
           type: 'sendMessage',
-          payload: { message }
+          payload: { message, audioContext }
         });
-        // Return mock data for now
         return {
           data: {
             reply: "Message sent through VS Code extension",
@@ -114,11 +110,13 @@ export const api = {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ message }),
+        body: JSON.stringify({ message, audio_context: audioContext }),
       });
+      
       if (!response.ok) {
         throw new Error('Failed to send message');
       }
+      
       const data = await response.json();
       return { data };
     } catch (error) {
@@ -134,7 +132,6 @@ export const api = {
   async checkVpnConnection(): Promise<boolean> {
     try {
       if (vscode) {
-        // In VS Code extension, assume VPN is connected
         return true;
       }
       const response = await fetch(`${API_BASE_URL}/api/vpn/status`);

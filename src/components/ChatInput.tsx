@@ -1,8 +1,9 @@
 import { Send } from "lucide-react";
 import { useState } from "react";
+import { AudioUpload } from "./AudioUpload";
 
 interface ChatInputProps {
-  onSend: (message: string, code?: string, languageId?: string) => void;
+  onSend: (message: string, code?: string, languageId?: string, audioContext?: string) => void;
   disabled?: boolean;
 }
 
@@ -11,14 +12,16 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
   const [code, setCode] = useState("");
   const [languageId, setLanguageId] = useState("");
   const [showCodeInput, setShowCodeInput] = useState(false);
+  const [audioContext, setAudioContext] = useState<string | undefined>();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (message.trim()) {
-      onSend(message, code, languageId);
+      onSend(message, code, languageId, audioContext);
       setMessage("");
       setCode("");
       setLanguageId("");
+      setAudioContext(undefined);
       setShowCodeInput(false);
     }
   };
@@ -35,6 +38,7 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
             className="flex-1 px-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary/20 transition-shadow"
             disabled={disabled}
           />
+          <AudioUpload onAudioContext={setAudioContext} />
           <button
             type="button"
             onClick={() => setShowCodeInput(!showCodeInput)}
