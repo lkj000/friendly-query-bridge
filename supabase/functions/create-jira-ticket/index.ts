@@ -62,55 +62,72 @@ ${description}
     const jiraUrl = `https://${cleanDomain}/rest/api/3/issue`;
     console.log('Sending request to JIRA API:', jiraUrl);
 
+    const authToken = btoa(`${jiraEmail}:${jiraApiToken}`);
+    console.log('Auth token generated (length):', authToken.length);
+
+    const requestBody = {
+      fields: {
+        project: {
+          key: 'SEC'
+        },
+        summary: summary,
+        description: {
+          type: 'doc',
+          version: 1,
+          content: [
+            {
+              type: 'paragraph',
+              content: [
+                {
+                  text: jiraDescription,
+                  type: 'text'
+                }
+              ]
+            }
+          ]
+        },
+        issuetype: {
+          name: 'Bug'
+        },
+        priority: {
+          name: severity === 'critical' ? 'Highest' : 
+                severity === 'high' ? 'High' : 
+                severity === 'medium' ? 'Medium' : 'Low'
+        }
+      }
+    };
+
+    console.log('Request body:', JSON.stringify(requestBody, null, 2));
+
     const response = await fetch(jiraUrl, {
       method: 'POST',
       headers: {
-        'Authorization': `Basic ${btoa(`${jiraEmail}:${jiraApiToken}`)}`,
+        'Authorization': `Basic ${authToken}`,
         'Accept': 'application/json',
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        fields: {
-          project: {
-            key: 'SEC'
-          },
-          summary: summary,
-          description: {
-            type: 'doc',
-            version: 1,
-            content: [
-              {
-                type: 'paragraph',
-                content: [
-                  {
-                    text: jiraDescription,
-                    type: 'text'
-                  }
-                ]
-              }
-            ]
-          },
-          issuetype: {
-            name: 'Bug'
-          },
-          priority: {
-            name: severity === 'critical' ? 'Highest' : 
-                  severity === 'high' ? 'High' : 
-                  severity === 'medium' ? 'Medium' : 'Low'
-          }
-        }
-      })
+      body: JSON.stringify(requestBody)
     });
 
-    const responseData = await response.json();
+    const responseText = await response.text();
+    console.log('Raw response:', responseText);
+
+    let responseData;
+    try {
+      responseData = JSON.parse(responseText);
+    } catch (e) {
+      console.error('Failed to parse response:', e);
+      responseData = { error: 'Invalid JSON response' };
+    }
 
     if (!response.ok) {
       console.error('JIRA API Error:', {
         status: response.status,
         statusText: response.statusText,
-        data: responseData
+        data: responseData,
+        headers: Object.fromEntries(response.headers.entries())
       });
-      throw new Error(responseData.message || 'Failed to create JIRA ticket');
+      throw new Error(responseData.message || responseData.errorMessages?.[0] || 'Failed to create JIRA ticket');
     }
 
     console.log('JIRA ticket created successfully:', responseData);
@@ -125,7 +142,8 @@ ${description}
     return new Response(
       JSON.stringify({ 
         error: error.message,
-        details: error.toString()
+        details: error.toString(),
+        stack: error.stack
       }), 
       { 
         status: 500,
