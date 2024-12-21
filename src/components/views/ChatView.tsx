@@ -1,6 +1,8 @@
 import React from 'react';
+import { useQuery, useMutation } from '@tanstack/react-query';
 import { ChatInput } from "@/components/ChatInput";
 import { ChatMessage } from "@/components/ChatMessage";
+import { api } from '@/services/api';
 
 export function ChatView() {
   const [messages, setMessages] = React.useState<Array<{
@@ -10,6 +12,18 @@ export function ChatView() {
     languageId?: string;
   }>>([]);
 
+  const sendMessageMutation = useMutation({
+    mutationFn: (message: string) => api.sendChatMessage(message),
+    onSuccess: (response) => {
+      if (response.data) {
+        setMessages(prev => [...prev, {
+          content: response.data.reply,
+          isUser: false,
+        }]);
+      }
+    },
+  });
+
   const handleSendMessage = (message: string, code?: string, languageId?: string) => {
     setMessages(prev => [...prev, {
       content: message,
@@ -18,13 +32,7 @@ export function ChatView() {
       languageId
     }]);
     
-    // Simulate bot response - in real implementation, this would call your bot API
-    setTimeout(() => {
-      setMessages(prev => [...prev, {
-        content: "I'm analyzing your request. Please note that I'm currently in development mode.",
-        isUser: false
-      }]);
-    }, 1000);
+    sendMessageMutation.mutate(message);
   };
 
   return (
@@ -40,7 +48,10 @@ export function ChatView() {
           />
         ))}
       </div>
-      <ChatInput onSend={handleSendMessage} />
+      <ChatInput 
+        onSend={handleSendMessage} 
+        disabled={sendMessageMutation.isPending}
+      />
     </div>
   );
 }
