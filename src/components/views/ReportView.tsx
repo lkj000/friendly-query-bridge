@@ -10,7 +10,7 @@ interface ReportViewProps {
 }
 
 export function ReportView({ type, title }: ReportViewProps) {
-  const { data: report, isLoading } = useQuery({
+  const { data: report, isLoading, error } = useQuery({
     queryKey: ['report', type],
     queryFn: () => api.fetchSecurityReport(type),
   });
@@ -19,6 +19,14 @@ export function ReportView({ type, title }: ReportViewProps) {
     return (
       <div className="p-4">
         <p className="text-muted-foreground">Loading report...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="p-4">
+        <p className="text-destructive">Error loading report. Please try again.</p>
       </div>
     );
   }
@@ -67,6 +75,26 @@ export function ReportView({ type, title }: ReportViewProps) {
             </p>
           </CardContent>
         </Card>
+
+        {report?.data?.details && (
+          <div className="md:col-span-2 space-y-4">
+            <h3 className="text-xl font-semibold">Details</h3>
+            {report.data.details.map((detail) => (
+              <Card key={detail.id}>
+                <CardHeader>
+                  <CardTitle className="flex items-center text-sm">
+                    {detail.severity === 'high' && <Shield className="mr-2 text-red-500" />}
+                    {detail.severity === 'medium' && <AlertTriangle className="mr-2 text-yellow-500" />}
+                    {detail.title}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-muted-foreground">{detail.description}</p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
