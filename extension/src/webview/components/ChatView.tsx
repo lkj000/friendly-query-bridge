@@ -1,5 +1,8 @@
 import React, { useState } from 'react';
 import { MessageHandler } from '../messageHandler';
+import { AudioLines, Video } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { useToast } from '@/hooks/use-toast';
 
 interface ChatViewProps {
   messageHandler: MessageHandler;
@@ -8,6 +11,7 @@ interface ChatViewProps {
 export const ChatView: React.FC<ChatViewProps> = ({ messageHandler }) => {
   const [messages, setMessages] = useState<Array<{ content: string; isUser: boolean }>>([]);
   const [inputValue, setInputValue] = useState('');
+  const { toast } = useToast();
 
   const handleSendMessage = async () => {
     if (!inputValue.trim()) return;
@@ -26,6 +30,20 @@ export const ChatView: React.FC<ChatViewProps> = ({ messageHandler }) => {
     }
   };
 
+  const handleAudioClick = () => {
+    toast({
+      title: "Audio feature",
+      description: "Audio recording feature coming soon!",
+    });
+  };
+
+  const handleVideoClick = () => {
+    toast({
+      title: "Video feature",
+      description: "Video chat feature coming soon!",
+    });
+  };
+
   return (
     <div className="flex flex-col h-full p-4">
       <div className="flex-1 overflow-y-auto mb-4 space-y-4">
@@ -41,6 +59,22 @@ export const ChatView: React.FC<ChatViewProps> = ({ messageHandler }) => {
         ))}
       </div>
       <div className="flex gap-2">
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={handleAudioClick}
+          className="flex-shrink-0"
+        >
+          <AudioLines className="h-4 w-4" />
+        </Button>
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={handleVideoClick}
+          className="flex-shrink-0"
+        >
+          <Video className="h-4 w-4" />
+        </Button>
         <input
           type="text"
           value={inputValue}
