@@ -50,15 +50,67 @@ serve(async (req) => {
       lineNumber
     });
 
-    const jiraDescription = `
-*Severity:* ${severity}
-*Source:* ${source}
-${filePath ? `*File:* ${filePath}` : ''}
-${lineNumber ? `*Line:* ${lineNumber}` : ''}
+    // Format description in JIRA's Atlassian Document Format
+    const jiraDescription = {
+      version: 1,
+      type: "doc",
+      content: [
+        {
+          type: "heading",
+          attrs: { level: 2 },
+          content: [{ type: "text", text: "Security Vulnerability Details" }]
+        },
+        {
+          type: "paragraph",
+          content: [
+            { type: "text", text: "Severity: ", marks: [{ type: "strong" }] },
+            { type: "text", text: severity }
+          ]
+        },
+        {
+          type: "paragraph",
+          content: [
+            { type: "text", text: "Source: ", marks: [{ type: "strong" }] },
+            { type: "text", text: source }
+          ]
+        }
+      ]
+    };
 
-*Description:*
-${description}
-    `;
+    // Add file path if provided
+    if (filePath) {
+      jiraDescription.content.push({
+        type: "paragraph",
+        content: [
+          { type: "text", text: "File: ", marks: [{ type: "strong" }] },
+          { type: "text", text: filePath }
+        ]
+      });
+    }
+
+    // Add line number if provided
+    if (lineNumber) {
+      jiraDescription.content.push({
+        type: "paragraph",
+        content: [
+          { type: "text", text: "Line: ", marks: [{ type: "strong" }] },
+          { type: "text", text: lineNumber.toString() }
+        ]
+      });
+    }
+
+    // Add description
+    jiraDescription.content.push(
+      {
+        type: "heading",
+        attrs: { level: 3 },
+        content: [{ type: "text", text: "Description" }]
+      },
+      {
+        type: "paragraph",
+        content: [{ type: "text", text: description }]
+      }
+    );
 
     const jiraUrl = `https://${cleanDomain}/rest/api/3/issue`;
     console.log('JIRA API URL:', jiraUrl);
@@ -69,26 +121,12 @@ ${description}
     const requestBody = {
       fields: {
         project: {
-          key: 'SEC'
+          key: "SEC"
         },
         summary: summary,
-        description: {
-          type: 'doc',
-          version: 1,
-          content: [
-            {
-              type: 'paragraph',
-              content: [
-                {
-                  text: jiraDescription,
-                  type: 'text'
-                }
-              ]
-            }
-          ]
-        },
+        description: jiraDescription,
         issuetype: {
-          name: 'Bug'
+          name: "Bug"
         },
         priority: {
           name: severity === 'critical' ? 'Highest' : 
@@ -129,9 +167,11 @@ ${description}
         headers: Object.fromEntries(response.headers.entries())
       });
       
-      const errorMessage = responseData.errorMessages?.[0] || 
-                          responseData.message || 
-                          `JIRA API error: ${response.status} ${response.statusText}`;
+      const errorMessage = responseData.errors ? 
+        Object.entries(responseData.errors).map(([field, error]) => `${field}: ${error}`).join(', ') :
+        responseData.errorMessages?.[0] || 
+        responseData.message || 
+        `JIRA API error: ${response.status} ${response.statusText}`;
       
       throw new Error(errorMessage);
     }
