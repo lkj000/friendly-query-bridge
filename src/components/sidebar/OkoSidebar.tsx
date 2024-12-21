@@ -3,13 +3,16 @@ import { OkoSidebarHeader } from './OkoSidebarHeader';
 import { OkoSidebarNav } from './OkoSidebarNav';
 import { OkoSidebarFooter } from './OkoSidebarFooter';
 
-export function OkoSidebar() {
-  const [activeView, setActiveView] = React.useState('chat');
+interface OkoSidebarProps {
+  activeView: string;
+  onViewChange: (view: string) => void;
+}
 
+export function OkoSidebar({ activeView, onViewChange }: OkoSidebarProps) {
   return (
     <div className="flex flex-col h-screen bg-background border-r">
       <OkoSidebarHeader />
-      <OkoSidebarNav activeView={activeView} onViewChange={setActiveView} />
+      <OkoSidebarNav activeView={activeView} onViewChange={onViewChange} />
       <OkoSidebarFooter />
     </div>
   );

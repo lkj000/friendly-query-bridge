@@ -3,6 +3,7 @@ import { ChatView } from "@/components/views/ChatView";
 import { ReportView } from "@/components/views/ReportView";
 import { VulnerabilityView } from "@/components/views/VulnerabilityView";
 import { ApiIntegrationsView } from "@/components/views/ApiIntegrationsView";
+import { DashboardView } from "@/components/views/DashboardView";
 import { DefaultMessageHandler } from "@/services/messageHandler";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
@@ -11,7 +12,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "@/hooks/use-toast";
 
 export function Index() {
-  const [activeView, setActiveView] = useState('vulnerabilities');
+  const [activeView, setActiveView] = useState('dashboard');
   const messageHandler = DefaultMessageHandler.getInstance();
   const { user } = useAuth();
 
@@ -40,10 +41,11 @@ export function Index() {
   return (
     <div className="flex h-screen">
       <div className="w-64 flex-shrink-0">
-        <OkoSidebar />
+        <OkoSidebar activeView={activeView} onViewChange={setActiveView} />
       </div>
       
       <div className="flex-1">
+        {activeView === 'dashboard' && <DashboardView />}
         {activeView === 'chat' && <ChatView messageHandler={messageHandler} />}
         {activeView === 'vulnerabilities' && <VulnerabilityView />}
         {activeView === 'veracode' && (
