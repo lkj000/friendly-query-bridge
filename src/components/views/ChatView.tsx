@@ -10,11 +10,18 @@ export function ChatView() {
     isUser: boolean;
     code?: string;
     languageId?: string;
+    mediaContext?: {
+      type: string;
+      content: string;
+    };
   }>>([]);
 
   const sendMessageMutation = useMutation({
-    mutationFn: async ({ message, audioContext }: { message: string, audioContext?: string }) => {
-      return api.sendChatMessage(message, audioContext);
+    mutationFn: async ({ message, mediaContext }: { 
+      message: string, 
+      mediaContext?: { type: string; content: string; } 
+    }) => {
+      return api.sendChatMessage(message, mediaContext);
     },
     onSuccess: (response) => {
       if (response.data) {
@@ -26,15 +33,21 @@ export function ChatView() {
     },
   });
 
-  const handleSendMessage = (message: string, code?: string, languageId?: string, audioContext?: string) => {
+  const handleSendMessage = (
+    message: string, 
+    code?: string, 
+    languageId?: string, 
+    mediaContext?: { type: string; content: string; }
+  ) => {
     setMessages(prev => [...prev, {
       content: message,
       isUser: true,
       code,
-      languageId
+      languageId,
+      mediaContext
     }]);
     
-    sendMessageMutation.mutate({ message, audioContext });
+    sendMessageMutation.mutate({ message, mediaContext });
   };
 
   return (
@@ -47,6 +60,7 @@ export function ChatView() {
             isUser={message.isUser}
             code={message.code}
             languageId={message.languageId}
+            mediaContext={message.mediaContext}
           />
         ))}
       </div>
