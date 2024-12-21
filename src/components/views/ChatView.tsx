@@ -119,22 +119,29 @@ export const ChatView: React.FC<ChatViewProps> = ({ messageHandler }) => {
   };
 
   return (
-    <div className="flex flex-col h-full">
-      <div className="flex justify-end p-4">
+    <div className="flex flex-col h-full bg-background">
+      <div className="flex justify-between items-center p-4 border-b">
+        <h2 className="text-xl font-semibold text-primary">Ask Me</h2>
         <Button
           onClick={handleNewChat}
           variant="outline"
-          className="gap-2"
+          className="gap-2 hover:bg-secondary"
         >
           <PlusCircle className="h-4 w-4" />
           New Chat
         </Button>
       </div>
-      <MessageList messages={messages} />
-      <ChatInput 
-        onSendMessage={handleSendMessage}
-        disabled={isProcessing}
-      />
+      <div className="flex-1 overflow-hidden">
+        <MessageList messages={messages} />
+      </div>
+      <div className="border-t bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+        <div className="max-w-3xl mx-auto p-4">
+          <ChatInput 
+            onSendMessage={handleSendMessage}
+            disabled={isProcessing}
+          />
+        </div>
+      </div>
     </div>
   );
 };

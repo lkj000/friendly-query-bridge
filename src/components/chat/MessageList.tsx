@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { Card } from '@/components/ui/card';
+import { cn } from '@/lib/utils';
 
 interface Message {
   content: string;
@@ -61,7 +62,6 @@ export const MessageList: React.FC<MessageListProps> = ({ messages }) => {
       );
     }
 
-    // For text, CSV, Excel, and Word files, display a download link
     return (
       <Card className="p-4">
         <a 
@@ -77,24 +77,36 @@ export const MessageList: React.FC<MessageListProps> = ({ messages }) => {
   };
 
   return (
-    <div className="flex-1 overflow-y-auto p-4 space-y-4">
-      {messages.map((message, index) => (
-        <div
-          key={index}
-          className={`p-4 rounded-lg ${
-            message.is_bot 
-              ? 'bg-secondary mr-auto max-w-[80%]' 
-              : 'bg-primary text-primary-foreground ml-auto max-w-[80%]'
-          }`}
-        >
-          <div className="break-words">{message.content}</div>
-          {message.media_context && (
-            <div className="mt-2">
-              {renderMedia(message)}
+    <div className="flex-1 overflow-y-auto px-4 py-6 space-y-6">
+      <div className="max-w-3xl mx-auto space-y-6">
+        {messages.map((message, index) => (
+          <div
+            key={index}
+            className={cn(
+              "flex",
+              message.is_bot ? "justify-start" : "justify-end"
+            )}
+          >
+            <div
+              className={cn(
+                "max-w-[85%] px-4 py-3 rounded-lg break-words",
+                message.is_bot 
+                  ? "bg-secondary text-secondary-foreground" 
+                  : "bg-primary text-primary-foreground"
+              )}
+            >
+              <div className="prose dark:prose-invert">
+                {message.content}
+              </div>
+              {message.media_context && (
+                <div className="mt-2">
+                  {renderMedia(message)}
+                </div>
+              )}
             </div>
-          )}
-        </div>
-      ))}
+          </div>
+        ))}
+      </div>
       <div ref={messagesEndRef} />
     </div>
   );
