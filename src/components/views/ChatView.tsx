@@ -61,8 +61,8 @@ export const ChatView: React.FC<ChatViewProps> = ({ messageHandler }) => {
     return channel;
   };
 
-  const handleSendMessage = async (message: string, mediaUrl?: string, mediaType?: string) => {
-    if (!message.trim() && !mediaUrl) return;
+  const handleSendMessage = async (message: string, mediaContext?: { type: string; content: string }) => {
+    if (!message.trim() && !mediaContext) return;
 
     setIsProcessing(true);
     try {
@@ -72,7 +72,7 @@ export const ChatView: React.FC<ChatViewProps> = ({ messageHandler }) => {
         .insert({
           content: message,
           user_id: user?.id,
-          media_context: mediaUrl ? { type: mediaType, content: mediaUrl } : null,
+          media_context: mediaContext || null,
           is_bot: false
         })
         .select()
@@ -117,7 +117,7 @@ export const ChatView: React.FC<ChatViewProps> = ({ messageHandler }) => {
       <MessageList messages={messages} />
       <ChatInput 
         onSendMessage={handleSendMessage}
-        isProcessing={isProcessing}
+        disabled={isProcessing}
       />
     </div>
   );
