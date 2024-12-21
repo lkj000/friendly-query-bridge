@@ -10,8 +10,13 @@ import { supabase } from '@/integrations/supabase/client';
 import { ConversationList } from '@/components/chat/ConversationList';
 import { useConversations } from '@/hooks/useConversations';
 import { useMessages } from '@/hooks/useMessages';
+import { DefaultMessageHandler } from '@/services/messageHandler';
 
-export const ChatView: React.FC = () => {
+interface ChatViewProps {
+  messageHandler?: DefaultMessageHandler;
+}
+
+export const ChatView: React.FC<ChatViewProps> = ({ messageHandler }) => {
   const [currentConversation, setCurrentConversation] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const { user } = useAuth();
