@@ -31,48 +31,61 @@ export const MessageList: React.FC<MessageListProps> = ({ messages }) => {
     const { type, content } = message.media_context;
 
     if (type.startsWith('image/')) {
-      return <img src={content} alt="Uploaded content" className="max-w-full h-auto rounded-lg" />;
+      return (
+        <div className="mt-2">
+          <img src={content} alt="Uploaded content" className="max-w-full h-auto rounded-lg" />
+        </div>
+      );
     }
 
     if (type.startsWith('video/')) {
       return (
-        <video controls className="max-w-full rounded-lg">
-          <source src={content} type={type} />
-          Your browser does not support the video tag.
-        </video>
+        <div className="mt-2">
+          <video controls className="max-w-full rounded-lg">
+            <source src={content} type={type} />
+            Your browser does not support the video tag.
+          </video>
+        </div>
       );
     }
 
     if (type.startsWith('audio/')) {
       return (
-        <audio controls className="w-full">
-          <source src={content} type={type} />
-          Your browser does not support the audio tag.
-        </audio>
+        <div className="mt-2">
+          <audio controls className="w-full">
+            <source src={content} type={type} />
+            Your browser does not support the audio tag.
+          </audio>
+        </div>
       );
     }
 
     if (type === 'application/pdf') {
       return (
-        <iframe
-          src={content}
-          className="w-full h-96 rounded-lg"
-          title="PDF document"
-        />
+        <div className="mt-2">
+          <iframe
+            src={content}
+            className="w-full h-96 rounded-lg"
+            title="PDF document"
+          />
+        </div>
       );
     }
 
+    // For other file types, show a download link
     return (
-      <Card className="p-4">
-        <a 
-          href={content} 
-          target="_blank" 
-          rel="noopener noreferrer" 
-          className="text-blue-500 hover:underline flex items-center gap-2"
-        >
-          View uploaded file
-        </a>
-      </Card>
+      <div className="mt-2">
+        <Card className="p-4">
+          <a 
+            href={content} 
+            target="_blank" 
+            rel="noopener noreferrer" 
+            className="text-blue-500 hover:underline flex items-center gap-2"
+          >
+            View uploaded file
+          </a>
+        </Card>
+      </div>
     );
   };
 
@@ -98,11 +111,7 @@ export const MessageList: React.FC<MessageListProps> = ({ messages }) => {
               <div className="prose dark:prose-invert">
                 {message.content}
               </div>
-              {message.media_context && (
-                <div className="mt-2">
-                  {renderMedia(message)}
-                </div>
-              )}
+              {message.media_context && renderMedia(message)}
             </div>
           </div>
         ))}

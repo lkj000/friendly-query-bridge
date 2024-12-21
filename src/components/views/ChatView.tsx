@@ -7,6 +7,7 @@ import { MessageList } from '@/components/chat/MessageList';
 import { ChatInput } from '@/components/chat/ChatInput';
 import { Button } from '@/components/ui/button';
 import { PlusCircle } from 'lucide-react';
+import { MediaUpload } from '@/components/MediaUpload';
 
 interface ChatViewProps {
   messageHandler: DefaultMessageHandler;
@@ -17,6 +18,7 @@ export const ChatView: React.FC<ChatViewProps> = ({ messageHandler }) => {
   const [isProcessing, setIsProcessing] = useState(false);
   const { toast } = useToast();
   const { user } = useAuth();
+  const [mediaContext, setMediaContext] = useState<{ type: string; content: string } | null>(null);
 
   useEffect(() => {
     if (user) {
@@ -65,13 +67,22 @@ export const ChatView: React.FC<ChatViewProps> = ({ messageHandler }) => {
 
   const handleNewChat = () => {
     setMessages([]);
+    setMediaContext(null);
     toast({
       title: "New Chat Started",
       description: "You can now start a fresh conversation.",
     });
   };
 
-  const handleSendMessage = async (message: string, mediaContext?: { type: string; content: string }) => {
+  const handleMediaUpload = (context: { type: string; content: string }) => {
+    setMediaContext(context);
+    toast({
+      title: "Media uploaded",
+      description: "Your file has been uploaded and is ready to send.",
+    });
+  };
+
+  const handleSendMessage = async (message: string) => {
     if (!message.trim() && !mediaContext) return;
 
     setIsProcessing(true);
@@ -81,7 +92,7 @@ export const ChatView: React.FC<ChatViewProps> = ({ messageHandler }) => {
         .insert({
           content: message,
           user_id: user?.id,
-          media_context: mediaContext || null,
+          media_context: mediaContext,
           is_bot: false
         })
         .select()
@@ -106,6 +117,9 @@ export const ChatView: React.FC<ChatViewProps> = ({ messageHandler }) => {
       if (userMessage && botMessage) {
         setMessages(prev => [...prev, userMessage, botMessage]);
       }
+
+      // Clear media context after sending
+      setMediaContext(null);
     } catch (error) {
       console.error('Error in chat interaction:', error);
       toast({
@@ -136,10 +150,13 @@ export const ChatView: React.FC<ChatViewProps> = ({ messageHandler }) => {
       </div>
       <div className="border-t bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="max-w-3xl mx-auto p-4">
-          <ChatInput 
-            onSendMessage={handleSendMessage}
-            disabled={isProcessing}
-          />
+          <div className="space-y-4">
+            <MediaUpload onMediaContext={handleMediaUpload} />
+            <ChatInput 
+              onSendMessage={handleSendMessage}
+              disabled={isProcessing}
+            />
+          </div>
         </div>
       </div>
     </div>
