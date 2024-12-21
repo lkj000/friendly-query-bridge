@@ -19,10 +19,12 @@ export const ChatView: React.FC<ChatViewProps> = ({
   messageHandler = DefaultMessageHandler.getInstance() 
 }) => {
   const [messages, setMessages] = useState<Message[]>([]);
+  const [isProcessing, setIsProcessing] = useState(false);
   const { toast } = useToast();
 
   const handleSendMessage = async (message: string, mediaUrl?: string, mediaType?: string) => {
     try {
+      setIsProcessing(true);
       const newMessage: Message = {
         content: message,
         isUser: true,
@@ -44,13 +46,18 @@ export const ChatView: React.FC<ChatViewProps> = ({
         description: "Failed to send message. Please try again.",
         variant: "destructive",
       });
+    } finally {
+      setIsProcessing(false);
     }
   };
 
   return (
     <div className="flex flex-col h-full">
       <MessageList messages={messages} />
-      <ChatInput onSendMessage={handleSendMessage} />
+      <ChatInput 
+        onSendMessage={handleSendMessage} 
+        isProcessing={isProcessing} 
+      />
     </div>
   );
 };
