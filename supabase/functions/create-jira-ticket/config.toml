@@ -1,0 +1,4 @@
+project_id = "nbyzigrsbbbmzwswqxcz"
+
+[functions.create-jira-ticket]
+verify_jwt = true

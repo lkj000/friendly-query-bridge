@@ -1,45 +1,14 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-};
-
-interface CreateTicketPayload {
-  summary: string;
-  description: string;
-  severity: string;
-  source: string;
-  filePath?: string;
-  lineNumber?: number;
-}
+import { corsHeaders, validateJiraCredentials, createJiraDescription } from './jiraUtils.ts';
+import { CreateTicketPayload } from './types.ts';
 
 serve(async (req) => {
-  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const jiraEmail = Deno.env.get('JIRA_EMAIL');
-    const jiraApiToken = Deno.env.get('JIRA_API_TOKEN');
-    const jiraDomain = Deno.env.get('JIRA_DOMAIN');
-
-    // Validate environment variables with detailed logging
-    if (!jiraEmail || !jiraApiToken || !jiraDomain) {
-      const missingVars = {
-        email: !jiraEmail,
-        token: !jiraApiToken,
-        domain: !jiraDomain
-      };
-      console.error('Missing JIRA credentials:', missingVars);
-      throw new Error(`Missing JIRA credentials: ${JSON.stringify(missingVars)}`);
-    }
-
-    // Clean up domain and log it
-    const cleanDomain = jiraDomain.replace(/[\/]+$/, '').split('/')[0];
-    console.log('Using JIRA domain:', cleanDomain);
-
+    const credentials = validateJiraCredentials();
     const { summary, description, severity, source, filePath, lineNumber }: CreateTicketPayload = await req.json();
 
     console.log('Creating JIRA ticket with payload:', {
@@ -50,81 +19,19 @@ serve(async (req) => {
       lineNumber
     });
 
-    // Format description in JIRA's Atlassian Document Format
-    const jiraDescription = {
-      version: 1,
-      type: "doc",
-      content: [
-        {
-          type: "heading",
-          attrs: { level: 2 },
-          content: [{ type: "text", text: "Security Vulnerability Details" }]
-        },
-        {
-          type: "paragraph",
-          content: [
-            { type: "text", text: "Severity: ", marks: [{ type: "strong" }] },
-            { type: "text", text: severity }
-          ]
-        },
-        {
-          type: "paragraph",
-          content: [
-            { type: "text", text: "Source: ", marks: [{ type: "strong" }] },
-            { type: "text", text: source }
-          ]
-        }
-      ]
-    };
-
-    // Add file path if provided
-    if (filePath) {
-      jiraDescription.content.push({
-        type: "paragraph",
-        content: [
-          { type: "text", text: "File: ", marks: [{ type: "strong" }] },
-          { type: "text", text: filePath }
-        ]
-      });
-    }
-
-    // Add line number if provided
-    if (lineNumber) {
-      jiraDescription.content.push({
-        type: "paragraph",
-        content: [
-          { type: "text", text: "Line: ", marks: [{ type: "strong" }] },
-          { type: "text", text: lineNumber.toString() }
-        ]
-      });
-    }
-
-    // Add description
-    jiraDescription.content.push(
-      {
-        type: "heading",
-        attrs: { level: 3 },
-        content: [{ type: "text", text: "Description" }]
-      },
-      {
-        type: "paragraph",
-        content: [{ type: "text", text: description }]
-      }
-    );
-
-    const jiraUrl = `https://${cleanDomain}/rest/api/3/issue`;
+    const jiraUrl = `https://${credentials.domain}/rest/api/3/issue`;
     console.log('JIRA API URL:', jiraUrl);
 
-    const authToken = btoa(`${jiraEmail}:${jiraApiToken}`);
+    const authToken = btoa(`${credentials.email}:${credentials.apiToken}`);
     console.log('Auth token generated successfully');
 
     const requestBody = {
       fields: {
         project: {
-          key: "SEC"
+          key: credentials.projectKey
         },
         summary: summary,
-        description: jiraDescription,
+        description: createJiraDescription(description, severity, source, filePath, lineNumber),
         issuetype: {
           name: "Bug"
         },
