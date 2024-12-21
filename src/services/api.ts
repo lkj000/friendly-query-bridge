@@ -1,4 +1,5 @@
 import { toast } from "@/hooks/use-toast";
+import { getVsCodeApi } from "@/utils/vscode";
 
 interface ApiResponse<T> {
   data?: T;
@@ -23,14 +24,13 @@ interface ChatResponse {
 }
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
-const IS_VSCODE = typeof acquireVsCodeApi !== 'undefined';
+const vscode = getVsCodeApi();
 
 export const api = {
   async fetchSecurityReport(type: 'veracode' | 'sonar' | 'prisma'): Promise<ApiResponse<SecurityReport>> {
     try {
-      if (IS_VSCODE) {
+      if (vscode) {
         // Handle VS Code extension communication
-        const vscode = acquireVsCodeApi();
         vscode.postMessage({
           type: 'fetchReport',
           payload: { type }
@@ -64,9 +64,8 @@ export const api = {
 
   async sendChatMessage(message: string): Promise<ApiResponse<ChatResponse>> {
     try {
-      if (IS_VSCODE) {
+      if (vscode) {
         // Handle VS Code extension communication
-        const vscode = acquireVsCodeApi();
         vscode.postMessage({
           type: 'sendMessage',
           payload: { message }
@@ -104,7 +103,7 @@ export const api = {
 
   async checkVpnConnection(): Promise<boolean> {
     try {
-      if (IS_VSCODE) {
+      if (vscode) {
         // In VS Code extension, assume VPN is connected
         return true;
       }
