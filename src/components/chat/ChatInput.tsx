@@ -3,21 +3,27 @@ import { Button } from '@/components/ui/button';
 import { MediaButtons } from './MediaButtons';
 
 interface ChatInputProps {
-  onSendMessage: (message: string) => void;
+  onSendMessage: (message: string, mediaUrl?: string, mediaType?: string) => void;
 }
 
 export const ChatInput = ({ onSendMessage }: ChatInputProps) => {
   const [inputValue, setInputValue] = useState('');
+  const [mediaContext, setMediaContext] = useState<{ url: string; type: string } | null>(null);
 
   const handleSend = () => {
-    if (!inputValue.trim()) return;
-    onSendMessage(inputValue);
+    if (!inputValue.trim() && !mediaContext) return;
+    onSendMessage(inputValue, mediaContext?.url, mediaContext?.type);
     setInputValue('');
+    setMediaContext(null);
+  };
+
+  const handleMediaUpload = (url: string, type: string) => {
+    setMediaContext({ url, type });
   };
 
   return (
     <div className="flex gap-4 items-end">
-      <MediaButtons />
+      <MediaButtons onMediaUpload={handleMediaUpload} />
       <div className="flex-1 flex gap-2">
         <input
           type="text"
@@ -30,7 +36,7 @@ export const ChatInput = ({ onSendMessage }: ChatInputProps) => {
         <Button
           onClick={handleSend}
           className="px-4 py-2"
-          disabled={!inputValue.trim()}
+          disabled={!inputValue.trim() && !mediaContext}
         >
           Send
         </Button>

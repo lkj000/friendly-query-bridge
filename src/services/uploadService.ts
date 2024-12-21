@@ -5,10 +5,11 @@ export const uploadService = {
   async uploadFile(file: File): Promise<string | null> {
     try {
       const fileExt = file.name.split('.').pop();
-      const filePath = `${Math.random()}.${fileExt}`;
+      const fileName = `${Math.random()}.${fileExt}`;
+      
       const { error: uploadError } = await supabase.storage
         .from('media')
-        .upload(filePath, file);
+        .upload(fileName, file);
 
       if (uploadError) {
         throw uploadError;
@@ -16,7 +17,7 @@ export const uploadService = {
 
       const { data: { publicUrl } } = supabase.storage
         .from('media')
-        .getPublicUrl(filePath);
+        .getPublicUrl(fileName);
 
       return publicUrl;
     } catch (error) {
