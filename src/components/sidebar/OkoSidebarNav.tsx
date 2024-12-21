@@ -43,7 +43,7 @@ export function OkoSidebarNav({ activeView, onViewChange }: OkoSidebarNavProps) 
         onClick={() => onViewChange('chat')}
       >
         <MessageSquare className="mr-2 h-4 w-4" />
-        Ask Me
+        AskMe
       </Button>
       
       <Button
