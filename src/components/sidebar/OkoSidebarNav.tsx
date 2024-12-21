@@ -1,6 +1,6 @@
 import React from 'react';
 import { Button } from "@/components/ui/button";
-import { MessageSquare, Shield, Bug, Lock, AlertTriangle, Network } from "lucide-react";
+import { MessageSquare, Shield, Bug, Lock, AlertTriangle, Network, LayoutDashboard } from "lucide-react";
 
 interface OkoSidebarNavProps {
   activeView: string;
@@ -10,6 +10,15 @@ interface OkoSidebarNavProps {
 export function OkoSidebarNav({ activeView, onViewChange }: OkoSidebarNavProps) {
   return (
     <nav className="flex flex-col p-4 space-y-2">
+      <Button
+        variant={activeView === 'dashboard' ? 'default' : 'ghost'}
+        className="w-full justify-start"
+        onClick={() => onViewChange('dashboard')}
+      >
+        <LayoutDashboard className="mr-2 h-4 w-4" />
+        Dashboard
+      </Button>
+
       <Button
         variant={activeView === 'vulnerabilities' ? 'default' : 'ghost'}
         className="w-full justify-start"
