@@ -1,8 +1,9 @@
 import React from 'react';
+import { MediaButton } from './buttons/MediaButton';
 import { AudioButton } from './buttons/AudioButton';
-import { VideoButton } from './buttons/VideoButton';
 import { DocumentButton } from './buttons/DocumentButton';
 import { SpreadsheetButton } from './buttons/SpreadsheetButton';
+import { VideoButton } from './buttons/VideoButton';
 
 interface MediaButtonsProps {
   onFileSelect: (file: File) => void;
@@ -11,7 +12,7 @@ interface MediaButtonsProps {
 
 export const MediaButtons: React.FC<MediaButtonsProps> = ({ onFileSelect, disabled }) => {
   return (
-    <div className="flex gap-4">
+    <div className="flex items-center gap-4">
       <AudioButton onFileSelect={onFileSelect} disabled={disabled} />
       <VideoButton onFileSelect={onFileSelect} disabled={disabled} />
       <DocumentButton onFileSelect={onFileSelect} disabled={disabled} />

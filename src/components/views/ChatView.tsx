@@ -5,9 +5,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { MessageList } from '@/components/chat/MessageList';
 import { ChatInput } from '@/components/chat/ChatInput';
-import { Button } from '@/components/ui/button';
-import { PlusCircle } from 'lucide-react';
-import { MediaUpload } from '@/components/MediaUpload';
+import { ChatHeader } from '@/components/chat/ChatHeader';
+import { MediaButtons } from '@/components/chat/MediaButtons';
 
 interface ChatViewProps {
   messageHandler: DefaultMessageHandler;
@@ -56,7 +55,6 @@ export const ChatView: React.FC<ChatViewProps> = ({ messageHandler }) => {
         'postgres_changes',
         { event: 'INSERT', schema: 'public', table: 'messages' },
         (payload) => {
-          console.log('New message received:', payload);
           setMessages(prev => [...prev, payload.new]);
         }
       )
@@ -74,12 +72,33 @@ export const ChatView: React.FC<ChatViewProps> = ({ messageHandler }) => {
     });
   };
 
-  const handleMediaUpload = (context: { type: string; content: string }) => {
-    setMediaContext(context);
-    toast({
-      title: "Media uploaded",
-      description: "Your file has been uploaded and is ready to send.",
-    });
+  const handleFileSelect = async (file: File) => {
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const response = await fetch('http://localhost:8000/api/upload-media', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) throw new Error('Upload failed');
+
+      const data = await response.json();
+      setMediaContext({ type: file.type, content: data.media_context });
+      
+      toast({
+        title: "File uploaded successfully",
+        description: "Your file has been processed and is ready to send.",
+      });
+    } catch (error) {
+      console.error('Error uploading file:', error);
+      toast({
+        title: "Error uploading file",
+        description: "Failed to upload file. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleSendMessage = async (message: string) => {
@@ -118,7 +137,6 @@ export const ChatView: React.FC<ChatViewProps> = ({ messageHandler }) => {
         setMessages(prev => [...prev, userMessage, botMessage]);
       }
 
-      // Clear media context after sending
       setMediaContext(null);
     } catch (error) {
       console.error('Error in chat interaction:', error);
@@ -134,24 +152,14 @@ export const ChatView: React.FC<ChatViewProps> = ({ messageHandler }) => {
 
   return (
     <div className="flex flex-col h-full bg-background">
-      <div className="flex justify-between items-center p-4 border-b">
-        <h2 className="text-xl font-semibold text-primary">AskMe</h2>
-        <Button
-          onClick={handleNewChat}
-          variant="outline"
-          className="gap-2 hover:bg-secondary"
-        >
-          <PlusCircle className="h-4 w-4" />
-          New Chat
-        </Button>
-      </div>
+      <ChatHeader onNewChat={handleNewChat} />
       <div className="flex-1 overflow-hidden">
         <MessageList messages={messages} />
       </div>
       <div className="border-t bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="max-w-3xl mx-auto p-4">
           <div className="space-y-4">
-            <MediaUpload onMediaContext={handleMediaUpload} />
+            <MediaButtons onFileSelect={handleFileSelect} disabled={isProcessing} />
             <ChatInput 
               onSendMessage={handleSendMessage}
               disabled={isProcessing}

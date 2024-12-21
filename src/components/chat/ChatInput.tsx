@@ -4,7 +4,7 @@ import { Send } from 'lucide-react';
 import { VoiceInput } from './VoiceInput';
 
 interface ChatInputProps {
-  onSendMessage: (message: string, mediaContext?: { type: string; content: string }) => void;
+  onSendMessage: (message: string) => void;
   disabled?: boolean;
 }
 
