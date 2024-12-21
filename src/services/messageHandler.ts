@@ -16,6 +16,7 @@ export class DefaultMessageHandler implements MessageHandler {
 
   async sendChatMessage(message: string, mediaContext?: { type: string; content: string }): Promise<string> {
     // Simulate sending a message and receiving a response
-    return `Response to: ${message}`;
+    const mediaInfo = mediaContext ? `with ${mediaContext.type} attachment` : '';
+    return `Response to: ${message} ${mediaInfo}`;
   }
 }

@@ -5,7 +5,7 @@ export const uploadService = {
   async uploadFile(file: File): Promise<string | null> {
     try {
       const fileExt = file.name.split('.').pop();
-      const fileName = `${Math.random()}.${fileExt}`;
+      const fileName = `${crypto.randomUUID()}.${fileExt}`;
       
       const { error: uploadError, data } = await supabase.storage
         .from('media')

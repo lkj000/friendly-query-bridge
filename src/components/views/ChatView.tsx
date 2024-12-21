@@ -1,18 +1,18 @@
 import React, { useState } from 'react';
-import { DefaultMessageHandler } from '../../services/messageHandler';
+import { DefaultMessageHandler } from '@/services/messageHandler';
 import { useToast } from '@/hooks/use-toast';
 import { MessageList } from '../chat/MessageList';
 import { ChatInput } from '../chat/ChatInput';
-
-interface ChatViewProps {
-  messageHandler?: DefaultMessageHandler;
-}
 
 interface Message {
   content: string;
   isUser: boolean;
   mediaUrl?: string;
   mediaType?: string;
+}
+
+interface ChatViewProps {
+  messageHandler?: DefaultMessageHandler;
 }
 
 export const ChatView: React.FC<ChatViewProps> = ({ 

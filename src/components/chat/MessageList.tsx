@@ -15,47 +15,43 @@ export const MessageList: React.FC<MessageListProps> = ({ messages }) => {
   const renderMedia = (message: Message) => {
     if (!message.mediaUrl) return null;
 
-    switch (message.mediaType) {
-      case 'image':
-        return <img src={message.mediaUrl} alt="Uploaded content" className="max-w-full h-auto rounded-lg" />;
-      case 'video':
-        return (
-          <video controls className="max-w-full rounded-lg">
-            <source src={message.mediaUrl} type="video/mp4" />
-            Your browser does not support the video tag.
-          </video>
-        );
-      case 'audio':
-        return (
-          <audio controls className="w-full">
-            <source src={message.mediaUrl} type="audio/mpeg" />
-            Your browser does not support the audio tag.
-          </audio>
-        );
-      case 'pdf':
-        return (
-          <iframe
-            src={message.mediaUrl}
-            className="w-full h-96 rounded-lg"
-            title="PDF document"
-          />
-        );
-      default:
-        return (
-          <a 
-            href={message.mediaUrl} 
-            target="_blank" 
-            rel="noopener noreferrer" 
-            className="text-blue-500 hover:underline"
-          >
-            View uploaded file
-          </a>
-        );
+    if (message.mediaType?.startsWith('image/')) {
+      return <img src={message.mediaUrl} alt="Uploaded content" className="max-w-full h-auto rounded-lg" />;
     }
+
+    if (message.mediaType?.startsWith('video/')) {
+      return (
+        <video controls className="max-w-full rounded-lg">
+          <source src={message.mediaUrl} type={message.mediaType} />
+          Your browser does not support the video tag.
+        </video>
+      );
+    }
+
+    if (message.mediaType?.startsWith('audio/')) {
+      return (
+        <audio controls className="w-full">
+          <source src={message.mediaUrl} type={message.mediaType} />
+          Your browser does not support the audio tag.
+        </audio>
+      );
+    }
+
+    // For other file types (PDF, text, etc.), show a download link
+    return (
+      <a 
+        href={message.mediaUrl} 
+        target="_blank" 
+        rel="noopener noreferrer" 
+        className="text-blue-500 hover:underline"
+      >
+        View uploaded file
+      </a>
+    );
   };
 
   return (
-    <div className="flex-1 overflow-y-auto mb-4 space-y-4">
+    <div className="flex-1 overflow-y-auto mb-4 space-y-4 p-4">
       {messages.map((message, index) => (
         <div
           key={index}

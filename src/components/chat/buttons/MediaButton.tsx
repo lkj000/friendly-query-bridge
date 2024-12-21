@@ -6,13 +6,14 @@ interface MediaButtonProps {
   icon: LucideIcon;
   label: string;
   onClick: () => void;
-  accept?: string;
+  disabled?: boolean;
 }
 
 export const MediaButton: React.FC<MediaButtonProps> = ({
   icon: Icon,
   label,
   onClick,
+  disabled,
 }) => {
   return (
     <div className="flex flex-col items-center">
@@ -20,6 +21,7 @@ export const MediaButton: React.FC<MediaButtonProps> = ({
         variant="outline"
         size="icon"
         onClick={onClick}
+        disabled={disabled}
         className="flex-shrink-0"
       >
         <Icon className="h-4 w-4" />
