@@ -1,94 +1,82 @@
-import React, { useState, useCallback } from 'react';
-import { Mic, MicOff, Loader2 } from 'lucide-react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
+import { Mic, MicOff } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 interface VoiceInputProps {
-  onTranscript: (text: string) => void;
+  onTranscript: (transcript: string) => void;
   disabled?: boolean;
 }
 
 export const VoiceInput: React.FC<VoiceInputProps> = ({ onTranscript, disabled }) => {
-  const [isListening, setIsListening] = useState(false);
-  const [recognition, setRecognition] = useState<any>(null);
+  const [isRecording, setIsRecording] = useState(false);
   const { toast } = useToast();
 
-  const startListening = useCallback(() => {
+  const handleVoiceInput = async () => {
     try {
       const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
       if (!SpeechRecognition) {
         toast({
-          title: "Speech Recognition Not Supported",
-          description: "Your browser doesn't support voice input.",
+          title: "Not Supported",
+          description: "Voice input is not supported in your browser.",
           variant: "destructive",
         });
         return;
       }
 
-      const recognitionInstance = new SpeechRecognition();
-      recognitionInstance.continuous = true;
-      recognitionInstance.interimResults = true;
-      recognitionInstance.lang = 'en-US';
+      const recognition = new SpeechRecognition();
+      recognition.continuous = false;
+      recognition.interimResults = false;
+      recognition.lang = 'en-US';
 
-      recognitionInstance.onresult = (event) => {
-        const transcript = Array.from(event.results)
-          .map(result => result[0])
-          .map(result => result.transcript)
-          .join('');
-
-        if (event.results[0].isFinal) {
-          onTranscript(transcript);
-          stopListening();
-        }
+      recognition.onstart = () => {
+        setIsRecording(true);
+        toast({
+          title: "Listening",
+          description: "Speak now...",
+        });
       };
 
-      recognitionInstance.onerror = (event) => {
+      recognition.onresult = (event) => {
+        const transcript = event.results[0][0].transcript;
+        onTranscript(transcript);
+      };
+
+      recognition.onerror = (event) => {
         console.error('Speech recognition error:', event.error);
         toast({
           title: "Error",
           description: "Failed to recognize speech. Please try again.",
           variant: "destructive",
         });
-        stopListening();
+        setIsRecording(false);
       };
 
-      recognitionInstance.start();
-      setRecognition(recognitionInstance);
-      setIsListening(true);
-      
-      toast({
-        title: "Listening",
-        description: "Speak now...",
-      });
+      recognition.onend = () => {
+        setIsRecording(false);
+      };
+
+      recognition.start();
     } catch (error) {
-      console.error('Error starting speech recognition:', error);
+      console.error('Error starting voice input:', error);
       toast({
         title: "Error",
         description: "Failed to start voice input. Please try again.",
         variant: "destructive",
       });
+      setIsRecording(false);
     }
-  }, [onTranscript, toast]);
-
-  const stopListening = useCallback(() => {
-    if (recognition) {
-      recognition.stop();
-      setRecognition(null);
-    }
-    setIsListening(false);
-  }, [recognition]);
+  };
 
   return (
     <Button
       variant="outline"
       size="icon"
-      onClick={isListening ? stopListening : startListening}
-      disabled={disabled}
-      className={isListening ? 'bg-red-100 hover:bg-red-200' : ''}
+      onClick={handleVoiceInput}
+      disabled={disabled || isRecording}
+      className={isRecording ? 'bg-red-100 hover:bg-red-200' : ''}
     >
-      {disabled ? (
-        <Loader2 className="h-4 w-4 animate-spin" />
-      ) : isListening ? (
+      {isRecording ? (
         <MicOff className="h-4 w-4 text-red-500" />
       ) : (
         <Mic className="h-4 w-4" />

@@ -1,6 +1,4 @@
-import React, { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Check, Copy, Download } from 'lucide-react';
+import React from 'react';
 import { cn } from '@/lib/utils';
 
 interface ChatMessageProps {
@@ -12,15 +10,7 @@ interface ChatMessageProps {
   };
 }
 
-export function ChatMessage({ content, isUser, mediaContext }: ChatMessageProps) {
-  const [copied, setCopied] = useState(false);
-
-  const copyToClipboard = async (text: string) => {
-    await navigator.clipboard.writeText(text);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
-
+export const ChatMessage: React.FC<ChatMessageProps> = ({ content, isUser, mediaContext }) => {
   const renderMedia = () => {
     if (!mediaContext) return null;
     const { type, content: mediaContent } = mediaContext;
@@ -54,50 +44,11 @@ export function ChatMessage({ content, isUser, mediaContext }: ChatMessageProps)
       );
     }
 
-    if (type === 'application/pdf') {
-      return (
-        <div className="flex flex-col gap-2">
-          <iframe
-            src={mediaContent}
-            className="w-full h-96 rounded-lg"
-            title="PDF document"
-          />
-          <Button 
-            variant="outline" 
-            size="sm"
-            onClick={() => window.open(mediaContent, '_blank')}
-            className="flex items-center gap-2"
-          >
-            <Download className="h-4 w-4" />
-            Download PDF
-          </Button>
-        </div>
-      );
-    }
-
-    // For text files, CSV, Excel, Word docs
-    if (type.startsWith('text/') || 
-        type.includes('spreadsheet') || 
-        type.includes('word')) {
-      return (
-        <div className="flex items-center gap-2">
-          <span className="text-sm text-muted-foreground">
-            File uploaded: {type.split('/').pop()}
-          </span>
-          <Button 
-            variant="outline" 
-            size="sm"
-            onClick={() => window.open(mediaContent, '_blank')}
-            className="flex items-center gap-2"
-          >
-            <Download className="h-4 w-4" />
-            Download
-          </Button>
-        </div>
-      );
-    }
-
-    return null;
+    return (
+      <div className="text-sm text-muted-foreground">
+        File uploaded: {type.split('/').pop()}
+      </div>
+    );
   };
 
   return (
@@ -124,4 +75,4 @@ export function ChatMessage({ content, isUser, mediaContext }: ChatMessageProps)
       </div>
     </div>
   );
-}
+};
