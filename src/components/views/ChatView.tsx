@@ -5,6 +5,7 @@ import { ChatInput } from '@/components/chat/ChatInput';
 import { ChatHeader } from '@/components/chat/ChatHeader';
 import { MediaButtons } from '@/components/chat/MediaButtons';
 import { useMessages } from '@/hooks/useMessages';
+import { useToast } from '@/hooks/use-toast';
 
 interface ChatViewProps {
   messageHandler: DefaultMessageHandler;
@@ -18,6 +19,7 @@ export const ChatView: React.FC<ChatViewProps> = ({ messageHandler }) => {
     handleFileSelect,
     setMessages
   } = useMessages(messageHandler);
+  const { toast } = useToast();
 
   const handleNewChat = () => {
     setMessages([]);
