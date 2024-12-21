@@ -1,88 +1,101 @@
-# Multimodal RAG Chat Application
+# OKO Security Reports Extension for VS Code
 
-A comprehensive chat application that supports multiple types of media inputs including text, audio, images, video, PDF files, Excel spreadsheets, Word documents, and CSV files. The application implements Retrieval-Augmented Generation (RAG) to provide context-aware responses.
+🛡️ Elevate your development workflow with real-time security insights and quality metrics, right where you code.
 
-## Features
+## Overview
 
-- 🔐 User Authentication with Supabase
-- 🛡️ Row Level Security (RLS) for Data Protection
-- 🎤 Live audio recording and processing
-- 📸 Image upload and analysis
-- 🎥 Video upload and processing
-- 📄 Document processing (PDF, Word)
-- 📊 Spreadsheet handling (Excel, CSV)
-- 📝 Text file processing
-- 💬 Real-time chat interface
-- 🔄 Context-aware responses using RAG
-- 🎨 Modern UI with Tailwind CSS and shadcn/ui
+The OKO VS Code Extension seamlessly integrates critical security and quality reports from Veracode, Sonar, and Prisma directly into your development environment. Stay informed, secure, and efficient without leaving your editor.
 
-## Security Features
+## 🌟 Key Features
 
-### Authentication
-- Secure user authentication powered by Supabase
-- Protected routes for authenticated users only
-- Email/password authentication
-- Seamless login/logout functionality
+### 🔐 Comprehensive Security Integration
+- **Veracode Security Reports**: Real-time vulnerability assessments and security metrics
+- **Sonar Code Quality Analysis**: Instant access to code quality metrics and best practices
+- **Prisma Cloud Security**: Cloud security posture management at your fingertips
 
-### Row Level Security (RLS)
-- Enabled RLS on all database tables
-- Authenticated read access policies
-- Secure data access control
+### 💬 Interactive AI Assistant
+- Natural language queries about security findings
+- Context-aware responses using RAG technology
+- Code-specific security recommendations
+- Real-time chat interface for immediate support
+
+### 🎯 Developer-Centric Design
+- Intuitive sidebar interface
+- One-click access to critical metrics
+- Customizable report views
+- Seamless VPN integration
+
+### 🔒 Enterprise-Grade Security
+- Secure authentication via Platform Dashboard
+- VPN-exclusive operation
+- Row-level security for data protection
 - Protected incident data access
 
-## Quick Start
+## 🚀 Quick Start
 
-1. Clone the repository
-2. Install dependencies:
+1. Install dependencies:
    ```bash
    npm install
    cd backend && pip install -r requirements.txt
    ```
-3. Configure Supabase:
+
+2. Configure Supabase:
    - Enable Email authentication in Supabase Authentication settings
    - For development, disable email verification in Authentication settings
    - Set up the required environment variables
 
-4. Start the backend:
+3. Start the backend:
    ```bash
    cd backend && uvicorn main:app --reload
    ```
-5. Start the frontend:
+
+4. Start the frontend:
    ```bash
    npm run dev
    ```
 
-## Data Access
+## 📊 Data Access
 
-The application provides secure access to various incident-related data:
+Access comprehensive security metrics including:
 - Total incidents overview (with default fallback values)
 - Incident state tracking
 - Major incident management
 - Change-related incidents
 - Problem-related incidents
 
-## Development Notes
+## 🛠️ Development Setup
 
-For development purposes:
+### Authentication Configuration
 1. Enable Email authentication in Supabase Console:
-   - Go to Authentication > Providers
+   - Navigate to Authentication > Providers
    - Enable Email provider
    - Disable email verification for faster testing
-2. Use the Supabase Dashboard to manage:
-   - User authentication
-   - Database access
-   - RLS policies
-   - API access
 
-## Error Handling
+### Platform Integration
+Use the Supabase Dashboard to manage:
+- User authentication
+- Database access
+- RLS policies
+- API access
 
-The application includes robust error handling for:
+## 🎯 Views
+
+| View ID | Name | Description |
+|---------|------|-------------|
+| oko-sidebar-chat-view | Ask Me | AI-powered security assistant |
+| oko-sidebar-prismaReport-view | Prisma Report | Cloud security insights |
+| oko-sidebar-sonarReport-view | Sonar Report | Code quality metrics |
+| oko-sidebar-veracodeReport-view | Veracode Report | Security vulnerability analysis |
+
+## 🛡️ Error Handling
+
+Robust error handling for:
 - Authentication failures
 - Data fetching errors
 - Empty data states
 - API response validation
 
-## Detailed Documentation
+## 📚 Documentation
 
 For detailed documentation about:
 - Installation and setup
@@ -95,6 +108,16 @@ For detailed documentation about:
 
 Visit our [Documentation](./docs/README.md)
 
-## License
+## 🤝 Contributing
+
+We welcome contributions! Please see our [Contributing Guidelines](./CONTRIBUTING.md) for details.
+
+## 📄 License
 
 MIT License
+
+---
+
+> "Security is not a product, but a process." - Bruce Schneier
+
+Made with ❤️ by the OKO Security Team
