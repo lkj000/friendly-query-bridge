@@ -1,6 +1,10 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { corsHeaders } from './jiraUtils.ts';
 import { CreateTicketPayload } from './types.ts';
+
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+};
 
 serve(async (req) => {
   // Handle CORS preflight requests
@@ -24,16 +28,8 @@ serve(async (req) => {
       throw new Error('Missing required JIRA credentials');
     }
 
-    const { summary, description, severity, source, filePath, lineNumber }: CreateTicketPayload = await req.json();
-
-    console.log('Creating JIRA ticket with payload:', {
-      summary,
-      severity,
-      source,
-      filePath,
-      lineNumber,
-      projectKey
-    });
+    const payload: CreateTicketPayload = await req.json();
+    console.log('Creating JIRA ticket with payload:', payload);
 
     const cleanDomain = domain.replace(/[\/]+$/, '').split('/')[0];
     const jiraUrl = `https://${cleanDomain}/rest/api/3/issue`;
@@ -46,7 +42,7 @@ serve(async (req) => {
         project: {
           key: projectKey
         },
-        summary: summary,
+        summary: payload.summary,
         description: {
           version: 1,
           type: "doc",
@@ -56,7 +52,7 @@ serve(async (req) => {
               content: [
                 {
                   type: "text",
-                  text: description
+                  text: payload.description
                 }
               ]
             },
@@ -65,7 +61,7 @@ serve(async (req) => {
               content: [
                 {
                   type: "text",
-                  text: `Severity: ${severity}`,
+                  text: `Severity: ${payload.severity}`,
                   marks: [{ type: "strong" }]
                 }
               ]
@@ -75,7 +71,7 @@ serve(async (req) => {
               content: [
                 {
                   type: "text",
-                  text: `Source: ${source}`,
+                  text: `Source: ${payload.source}`,
                   marks: [{ type: "strong" }]
                 }
               ]
@@ -84,22 +80,17 @@ serve(async (req) => {
         },
         issuetype: {
           name: "Bug"
-        },
-        priority: {
-          name: severity === 'critical' ? 'Highest' : 
-                severity === 'high' ? 'High' : 
-                severity === 'medium' ? 'Medium' : 'Low'
         }
       }
     };
 
-    if (filePath) {
+    if (payload.filePath) {
       requestBody.fields.description.content.push({
         type: "paragraph",
         content: [
           {
             type: "text",
-            text: `File: ${filePath}${lineNumber ? `:${lineNumber}` : ''}`,
+            text: `File: ${payload.filePath}${payload.lineNumber ? `:${payload.lineNumber}` : ''}`,
             marks: [{ type: "code" }]
           }
         ]
