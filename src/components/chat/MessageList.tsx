@@ -1,4 +1,5 @@
 import React, { useEffect, useRef } from 'react';
+import { Card } from '@/components/ui/card';
 
 interface Message {
   content: string;
@@ -28,11 +29,11 @@ export const MessageList: React.FC<MessageListProps> = ({ messages }) => {
     if (!message.media_context) return null;
     const { type, content } = message.media_context;
 
-    if (type?.startsWith('image/')) {
+    if (type.startsWith('image/')) {
       return <img src={content} alt="Uploaded content" className="max-w-full h-auto rounded-lg" />;
     }
 
-    if (type?.startsWith('video/')) {
+    if (type.startsWith('video/')) {
       return (
         <video controls className="max-w-full rounded-lg">
           <source src={content} type={type} />
@@ -41,7 +42,7 @@ export const MessageList: React.FC<MessageListProps> = ({ messages }) => {
       );
     }
 
-    if (type?.startsWith('audio/')) {
+    if (type.startsWith('audio/')) {
       return (
         <audio controls className="w-full">
           <source src={content} type={type} />
@@ -50,15 +51,28 @@ export const MessageList: React.FC<MessageListProps> = ({ messages }) => {
       );
     }
 
+    if (type === 'application/pdf') {
+      return (
+        <iframe
+          src={content}
+          className="w-full h-96 rounded-lg"
+          title="PDF document"
+        />
+      );
+    }
+
+    // For text, CSV, Excel, and Word files, display a download link
     return (
-      <a 
-        href={content} 
-        target="_blank" 
-        rel="noopener noreferrer" 
-        className="text-blue-500 hover:underline"
-      >
-        View uploaded file
-      </a>
+      <Card className="p-4">
+        <a 
+          href={content} 
+          target="_blank" 
+          rel="noopener noreferrer" 
+          className="text-blue-500 hover:underline flex items-center gap-2"
+        >
+          View uploaded file
+        </a>
+      </Card>
     );
   };
 
