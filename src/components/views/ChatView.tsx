@@ -1,13 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { MessageList } from '@/components/chat/MessageList';
-import { ChatInput } from '@/components/chat/ChatInput';
-import { Button } from '@/components/ui/button';
-import { PlusCircle } from 'lucide-react';
-import { ScrollArea } from '@/components/ui/scroll-area';
+import { ChatHeader } from '@/components/chat/ChatHeader';
+import { ChatSidebar } from '@/components/chat/ChatSidebar';
+import { ChatInputSection } from '@/components/chat/ChatInputSection';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
-import { ConversationList } from '@/components/chat/ConversationList';
 import { useConversations } from '@/hooks/useConversations';
 import { useMessages } from '@/hooks/useMessages';
 import { DefaultMessageHandler } from '@/services/messageHandler';
@@ -49,26 +46,14 @@ export const ChatView: React.FC<ChatViewProps> = ({ messageHandler }) => {
 
   return (
     <div className="flex flex-col h-full bg-background">
-      <div className="flex justify-between items-center p-4 border-b">
-        <h2 className="text-xl font-semibold text-primary">AskMe</h2>
-        <Button
-          onClick={handleNewChat}
-          variant="outline"
-          className="gap-2 hover:bg-secondary"
-        >
-          <PlusCircle className="h-4 w-4" />
-          New Chat
-        </Button>
-      </div>
+      <ChatHeader onNewChat={handleNewChat} />
       <div className="flex flex-1 overflow-hidden">
-        <ScrollArea className="w-64 border-r p-4">
-          <ConversationList
-            conversations={conversations}
-            currentConversation={currentConversation}
-            onConversationSelect={setCurrentConversation}
-            isLoading={isLoadingConversations}
-          />
-        </ScrollArea>
+        <ChatSidebar
+          conversations={conversations}
+          currentConversation={currentConversation}
+          onConversationSelect={setCurrentConversation}
+          isLoading={isLoadingConversations}
+        />
         <div className="flex-1 flex flex-col">
           <div className="flex-1 overflow-hidden">
             <MessageList 
@@ -76,14 +61,10 @@ export const ChatView: React.FC<ChatViewProps> = ({ messageHandler }) => {
               isLoading={isLoadingMessages}
             />
           </div>
-          <div className="border-t bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-            <div className="max-w-3xl mx-auto p-4">
-              <ChatInput 
-                onSendMessage={sendMessage}
-                disabled={isProcessing || !currentConversation}
-              />
-            </div>
-          </div>
+          <ChatInputSection 
+            onSendMessage={sendMessage}
+            disabled={isProcessing || !currentConversation}
+          />
         </div>
       </div>
     </div>
