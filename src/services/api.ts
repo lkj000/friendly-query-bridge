@@ -59,21 +59,6 @@ export const api = {
 
   async fetchSecurityReport(type: 'veracode' | 'sonar' | 'prisma'): Promise<ApiResponse<SecurityReport>> {
     try {
-      if (vscode) {
-        vscode.postMessage({
-          type: 'fetchReport',
-          payload: { type }
-        });
-        return {
-          data: {
-            highSeverity: 0,
-            mediumSeverity: 0,
-            lastUpdated: new Date().toISOString(),
-            details: []
-          }
-        };
-      }
-
       const response = await fetch(`${API_BASE_URL}/api/reports/${type}`);
       if (!response.ok) {
         throw new Error('Failed to fetch report');
@@ -90,12 +75,15 @@ export const api = {
     }
   },
 
-  async sendChatMessage(message: string, audioContext?: string): Promise<ApiResponse<ChatResponse>> {
+  async sendChatMessage(
+    message: string, 
+    mediaContext?: { type: string; content: string }
+  ): Promise<ApiResponse<ChatResponse>> {
     try {
       if (vscode) {
         vscode.postMessage({
           type: 'sendMessage',
-          payload: { message, audioContext }
+          payload: { message, mediaContext }
         });
         return {
           data: {
@@ -110,7 +98,7 @@ export const api = {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ message, audio_context: audioContext }),
+        body: JSON.stringify({ message, media_context: mediaContext }),
       });
       
       if (!response.ok) {
@@ -131,9 +119,6 @@ export const api = {
 
   async checkVpnConnection(): Promise<boolean> {
     try {
-      if (vscode) {
-        return true;
-      }
       const response = await fetch(`${API_BASE_URL}/api/vpn/status`);
       return response.ok;
     } catch {
