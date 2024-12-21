@@ -38,11 +38,16 @@ A comprehensive chat application that supports multiple types of media inputs in
    npm install
    cd backend && pip install -r requirements.txt
    ```
-3. Start the backend:
+3. Configure Supabase:
+   - Enable Email authentication in Supabase Authentication settings
+   - For development, disable email verification in Authentication settings
+   - Set up the required environment variables
+
+4. Start the backend:
    ```bash
    cd backend && uvicorn main:app --reload
    ```
-4. Start the frontend:
+5. Start the frontend:
    ```bash
    npm run dev
    ```
@@ -50,7 +55,7 @@ A comprehensive chat application that supports multiple types of media inputs in
 ## Data Access
 
 The application provides secure access to various incident-related data:
-- Total incidents overview
+- Total incidents overview (with default fallback values)
 - Incident state tracking
 - Major incident management
 - Change-related incidents
@@ -59,12 +64,23 @@ The application provides secure access to various incident-related data:
 ## Development Notes
 
 For development purposes:
-1. Disable email verification in Supabase Console for faster testing
+1. Enable Email authentication in Supabase Console:
+   - Go to Authentication > Providers
+   - Enable Email provider
+   - Disable email verification for faster testing
 2. Use the Supabase Dashboard to manage:
    - User authentication
    - Database access
    - RLS policies
    - API access
+
+## Error Handling
+
+The application includes robust error handling for:
+- Authentication failures
+- Data fetching errors
+- Empty data states
+- API response validation
 
 ## Detailed Documentation
 
