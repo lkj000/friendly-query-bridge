@@ -120,4 +120,4 @@ MIT License
 
 > "Security is not a product, but a process." - Bruce Schneier
 
-Made with ❤️ by the OKO Security Team
+Made with ❤️ by the Okovanggoai (okovanggoai.com)
