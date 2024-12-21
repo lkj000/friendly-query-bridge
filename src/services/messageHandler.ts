@@ -36,11 +36,11 @@ export class DefaultMessageHandler implements MessageHandler {
       if (insertError) throw insertError;
 
       // Get response from Edge Function
-      const response = await fetch('https://nbyzigrsbbbmzwswqxcz.supabase.co/functions/v1/chat-response', {
+      const response = await fetch(`${supabase.supabaseUrl}/functions/v1/chat-response`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${process.env.SUPABASE_ANON_KEY}`,
+          'Authorization': `Bearer ${supabase.supabaseKey}`,
         },
         body: JSON.stringify({ message }),
       });
