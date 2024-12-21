@@ -89,3 +89,9 @@ npm run preview
 ## License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
+
+---
+
+Copyright © 2024 Okovanggoai. All rights reserved.
+
+Made with ❤️ by Okovanggoai (okovanggoai.com)
