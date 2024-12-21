@@ -45,19 +45,22 @@ export const ChatInput: React.FC<ChatInputProps> = ({ onSendMessage, isProcessin
     }
   };
 
+  const isDisabled = isUploading || isProcessing;
+  const inputPlaceholder = isProcessing ? "Processing message..." : "Type your message...";
+
   return (
     <div className="border-t p-4 bg-background/80 backdrop-blur-sm">
       <div className="flex flex-col gap-4 max-w-4xl mx-auto">
-        <MediaButtons onFileSelect={handleFileUpload} disabled={isUploading || isProcessing} />
+        <MediaButtons onFileSelect={handleFileUpload} disabled={isDisabled} />
         <div className="flex items-center gap-4">
           <MessageInput
             value={inputValue}
             onChange={setInputValue}
             onSend={handleSend}
-            disabled={isUploading || isProcessing}
-            placeholder={isProcessing ? "Processing message..." : "Type your message..."}
+            disabled={isDisabled}
+            placeholder={inputPlaceholder}
           />
-          {(isProcessing || isUploading) && (
+          {isDisabled && (
             <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
           )}
         </div>

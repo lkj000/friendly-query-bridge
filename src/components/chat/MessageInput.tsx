@@ -25,13 +25,13 @@ export const MessageInput: React.FC<MessageInputProps> = ({
   };
 
   return (
-    <div className="flex gap-2">
+    <div className="flex gap-2 flex-1">
       <input
         type="text"
         value={value}
         onChange={(e) => onChange(e.target.value)}
         onKeyPress={handleKeyPress}
-        className="flex-1 px-4 py-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-primary/20"
+        className="flex-1 px-4 py-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-primary/20 disabled:opacity-50 disabled:cursor-not-allowed"
         placeholder={placeholder}
         disabled={disabled}
       />

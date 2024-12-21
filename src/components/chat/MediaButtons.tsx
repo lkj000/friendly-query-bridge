@@ -6,16 +6,16 @@ import { SpreadsheetButton } from './buttons/SpreadsheetButton';
 
 interface MediaButtonsProps {
   onFileSelect: (file: File) => void;
-  isUploading: boolean;
+  disabled?: boolean;
 }
 
-export const MediaButtons: React.FC<MediaButtonsProps> = ({ onFileSelect, isUploading }) => {
+export const MediaButtons: React.FC<MediaButtonsProps> = ({ onFileSelect, disabled }) => {
   return (
     <div className="flex gap-4">
-      <AudioButton onFileSelect={onFileSelect} disabled={isUploading} />
-      <VideoButton onFileSelect={onFileSelect} disabled={isUploading} />
-      <DocumentButton onFileSelect={onFileSelect} disabled={isUploading} />
-      <SpreadsheetButton onFileSelect={onFileSelect} disabled={isUploading} />
+      <AudioButton onFileSelect={onFileSelect} disabled={disabled} />
+      <VideoButton onFileSelect={onFileSelect} disabled={disabled} />
+      <DocumentButton onFileSelect={onFileSelect} disabled={disabled} />
+      <SpreadsheetButton onFileSelect={onFileSelect} disabled={disabled} />
     </div>
   );
 };
