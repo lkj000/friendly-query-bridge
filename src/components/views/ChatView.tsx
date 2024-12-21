@@ -1,11 +1,14 @@
-import React from 'react';
-import { useQuery, useMutation } from '@tanstack/react-query';
-import { ChatInput } from "@/components/ChatInput";
-import { ChatMessage } from "@/components/ChatMessage";
-import { api } from '@/services/api';
+import React, { useState } from 'react';
+import { MessageHandler } from '../messageHandler';
+import { ChatInput } from '@/components/ChatInput';
+import { ChatMessage } from '@/components/ChatMessage';
 
-export function ChatView() {
-  const [messages, setMessages] = React.useState<Array<{
+interface ChatViewProps {
+  messageHandler: MessageHandler;
+}
+
+export const ChatView: React.FC<ChatViewProps> = ({ messageHandler }) => {
+  const [messages, setMessages] = useState<Array<{
     content: string;
     isUser: boolean;
     code?: string;
@@ -16,43 +19,37 @@ export function ChatView() {
     };
   }>>([]);
 
-  const sendMessageMutation = useMutation({
-    mutationFn: async ({ message, mediaContext }: { 
-      message: string, 
-      mediaContext?: { type: string; content: string; } 
-    }) => {
-      return api.sendChatMessage(message, mediaContext);
-    },
-    onSuccess: (response) => {
-      if (response.data) {
-        setMessages(prev => [...prev, {
-          content: response.data.reply,
-          isUser: false,
-        }]);
-      }
-    },
-  });
-
-  const handleSendMessage = (
-    message: string, 
-    code?: string, 
-    languageId?: string, 
-    mediaContext?: { type: string; content: string; }
+  const handleSendMessage = async (
+    message: string,
+    code?: string,
+    languageId?: string,
+    mediaContext?: { type: string; content: string }
   ) => {
-    setMessages(prev => [...prev, {
+    const newMessage = {
       content: message,
       isUser: true,
       code,
       languageId,
-      mediaContext
-    }]);
-    
-    sendMessageMutation.mutate({ message, mediaContext });
+      mediaContext,
+    };
+    setMessages((prev) => [...prev, newMessage]);
+
+    try {
+      const response = await messageHandler.sendChatMessage(message);
+      if (response) {
+        setMessages((prev) => [
+          ...prev,
+          { content: response, isUser: false },
+        ]);
+      }
+    } catch (error) {
+      console.error('Error sending message:', error);
+    }
   };
 
   return (
-    <div className="flex flex-col h-screen">
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+    <div className="flex flex-col h-full p-4">
+      <div className="flex-1 overflow-y-auto mb-4 space-y-4">
         {messages.map((message, index) => (
           <ChatMessage
             key={index}
@@ -64,10 +61,7 @@ export function ChatView() {
           />
         ))}
       </div>
-      <ChatInput 
-        onSend={handleSendMessage} 
-        disabled={sendMessageMutation.isPending}
-      />
+      <ChatInput onSend={handleSendMessage} />
     </div>
   );
-}
+};
