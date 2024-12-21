@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { Upload, Image, Video, FileText, FileSpreadsheet, AudioLines, File } from 'lucide-react';
 import { Button } from './ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { AudioRecorder } from './AudioRecorder';
 
 interface MediaUploadProps {
   onMediaContext: (context: { type: string; content: string }) => void;
@@ -61,11 +60,11 @@ export function MediaUpload({ onMediaContext }: MediaUploadProps) {
       />
       
       <div className="flex flex-col items-center">
-        <AudioRecorder onAudioRecorded={(blob) => {
-          const file = new File([blob], 'recording.wav', { type: 'audio/wav' });
-          const event = { target: { files: [file] } } as unknown as React.ChangeEvent<HTMLInputElement>;
-          handleFileUpload(event);
-        }} />
+        <label htmlFor="media-upload" className="cursor-pointer">
+          <Button variant="outline" size="icon" disabled={isUploading}>
+            <AudioLines className="h-4 w-4" />
+          </Button>
+        </label>
         <span className="text-xs mt-1">Audio</span>
       </div>
 
@@ -115,4 +114,4 @@ export function MediaUpload({ onMediaContext }: MediaUploadProps) {
       </div>
     </div>
   );
-};
+}

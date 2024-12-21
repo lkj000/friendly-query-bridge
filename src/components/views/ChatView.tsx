@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
-import { MessageHandler } from '../messageHandler';
+import { MessageHandler } from '../../services/messageHandler';
 import { ChatInput } from '@/components/ChatInput';
 import { ChatMessage } from '@/components/ChatMessage';
 
 interface ChatViewProps {
-  messageHandler: MessageHandler;
+  messageHandler?: MessageHandler;
 }
 
-export const ChatView: React.FC<ChatViewProps> = ({ messageHandler }) => {
+export const ChatView: React.FC<ChatViewProps> = ({ messageHandler = MessageHandler.getInstance() }) => {
   const [messages, setMessages] = useState<Array<{
     content: string;
     isUser: boolean;
