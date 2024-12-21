@@ -49,7 +49,7 @@ async function generateResponse(message: string, supabase: any): Promise<string>
     const { data: totalIncidents, error: totalError } = await supabase
       .from('total_incidents')
       .select('count')
-      .single()
+      .maybeSingle()
     
     if (totalError) {
       console.error('Error fetching total incidents:', totalError)
