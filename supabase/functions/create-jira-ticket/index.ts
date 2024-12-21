@@ -25,20 +25,29 @@ serve(async (req) => {
     const jiraApiToken = Deno.env.get('JIRA_API_TOKEN');
     const jiraDomain = Deno.env.get('JIRA_DOMAIN');
 
+    // Validate environment variables
     if (!jiraEmail || !jiraApiToken || !jiraDomain) {
+      console.error('Missing JIRA credentials:', {
+        hasEmail: !!jiraEmail,
+        hasToken: !!jiraApiToken,
+        hasDomain: !!jiraDomain
+      });
       throw new Error('Missing JIRA credentials');
     }
 
-    // Log credentials (without sensitive data)
-    console.log('JIRA Configuration:', {
-      email: jiraEmail,
-      domain: jiraDomain,
-      hasToken: !!jiraApiToken
-    });
+    // Clean up domain
+    const cleanDomain = jiraDomain.replace(/[\/]+$/, '').split('/')[0];
+    console.log('Using JIRA domain:', cleanDomain);
 
     const { summary, description, severity, source, filePath, lineNumber }: CreateTicketPayload = await req.json();
 
-    console.log('Creating JIRA ticket with payload:', { summary, severity, source });
+    console.log('Creating JIRA ticket with payload:', {
+      summary,
+      severity,
+      source,
+      filePath,
+      lineNumber
+    });
 
     const jiraDescription = `
 *Severity:* ${severity}
@@ -50,10 +59,7 @@ ${lineNumber ? `*Line:* ${lineNumber}` : ''}
 ${description}
     `;
 
-    // Clean up domain (remove any trailing slashes and ensure no API token is present)
-    const cleanDomain = jiraDomain.replace(/[\/]+$/, '').split('/')[0];
     const jiraUrl = `https://${cleanDomain}/rest/api/3/issue`;
-    
     console.log('Sending request to JIRA API:', jiraUrl);
 
     const response = await fetch(jiraUrl, {
@@ -77,8 +83,8 @@ ${description}
                 type: 'paragraph',
                 content: [
                   {
-                    type: 'text',
-                    text: jiraDescription
+                    text: jiraDescription,
+                    type: 'text'
                   }
                 ]
               }
@@ -96,26 +102,31 @@ ${description}
       })
     });
 
-    const data = await response.json();
+    const responseData = await response.json();
 
     if (!response.ok) {
-      console.error('JIRA API Error Response:', {
+      console.error('JIRA API Error:', {
         status: response.status,
         statusText: response.statusText,
-        data
+        data: responseData
       });
-      throw new Error(data.message || 'Failed to create JIRA ticket');
+      throw new Error(responseData.message || 'Failed to create JIRA ticket');
     }
 
-    console.log('JIRA ticket created successfully:', data);
+    console.log('JIRA ticket created successfully:', responseData);
 
-    return new Response(JSON.stringify(data), {
+    return new Response(JSON.stringify(responseData), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      status: 200
     });
+
   } catch (error) {
-    console.error('Error creating JIRA ticket:', error);
+    console.error('Error in create-jira-ticket function:', error);
     return new Response(
-      JSON.stringify({ error: error.message }), 
+      JSON.stringify({ 
+        error: error.message,
+        details: error.toString()
+      }), 
       { 
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
