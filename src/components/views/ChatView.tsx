@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { MessageHandler } from '../../services/messageHandler';
+import { DefaultMessageHandler, MessageHandler } from '../../services/messageHandler';
 import { useToast } from '@/hooks/use-toast';
 import { MessageList } from '../chat/MessageList';
 import { ChatInput } from '../chat/ChatInput';
@@ -15,7 +15,7 @@ interface Message {
   mediaType?: string;
 }
 
-export const ChatView: React.FC<ChatViewProps> = ({ messageHandler = MessageHandler.getInstance() }) => {
+export const ChatView: React.FC<ChatViewProps> = ({ messageHandler = DefaultMessageHandler.getInstance() }) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const { toast } = useToast();
 

@@ -2,7 +2,7 @@ import { OkoSidebar } from "@/components/sidebar/OkoSidebar";
 import { ChatView } from "@/components/views/ChatView";
 import { ReportView } from "@/components/views/ReportView";
 import { VulnerabilityView } from "@/components/views/VulnerabilityView";
-import { MessageHandler } from "@/services/messageHandler";
+import { DefaultMessageHandler } from "@/services/messageHandler";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -11,7 +11,7 @@ import { toast } from "@/hooks/use-toast";
 
 export function Index() {
   const [activeView, setActiveView] = useState('vulnerabilities');
-  const messageHandler = MessageHandler.getInstance();
+  const messageHandler = DefaultMessageHandler.getInstance();
   const { user } = useAuth();
 
   const { data: totalIncidents } = useQuery({
