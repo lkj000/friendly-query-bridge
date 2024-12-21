@@ -1,69 +1,207 @@
-# Welcome to your Lovable project
+# Multimodal RAG Chat Application
 
-## Project info
+A comprehensive chat application that supports multiple types of media inputs including text, audio, images, video, and PDF files. The application implements Retrieval-Augmented Generation (RAG) to provide context-aware responses.
 
-**URL**: https://lovable.dev/projects/e66ef2df-f986-4914-ae4f-9cea5e9477ea
+## Features
 
-## How can I edit this code?
+- 🎤 Live audio recording and processing
+- 📸 Image upload and analysis
+- 🎥 Video upload and processing
+- 📄 PDF document processing
+- 💬 Real-time chat interface
+- 🔄 Context-aware responses using RAG
+- 🎨 Modern UI with Tailwind CSS and shadcn/ui
 
-There are several ways of editing your application.
+## Technology Stack
 
-**Use Lovable**
+### Frontend
+- React + TypeScript
+- Vite
+- Tailwind CSS
+- shadcn/ui components
+- Tanstack Query for data fetching
+- Lucide React for icons
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/e66ef2df-f986-4914-ae4f-9cea5e9477ea) and start prompting.
+### Backend
+- FastAPI
+- Python 3.8+
+- Various ML libraries for media processing
 
-Changes made via Lovable will be committed automatically to this repo.
+## Prerequisites
 
-**Use your preferred IDE**
+1. Node.js (v16+)
+2. Python 3.8+
+3. pip (Python package manager)
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+## Installation
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+### Frontend Setup
 
-Follow these steps:
+```bash
+# Install Node.js dependencies
+npm install
+```
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+### Backend Setup
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+```bash
+# Navigate to backend directory
+cd backend
 
-# Step 3: Install the necessary dependencies.
-npm i
+# Create a virtual environment
+python -m venv venv
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+# Activate virtual environment
+# On Windows:
+venv\Scripts\activate
+# On Unix or MacOS:
+source venv/bin/activate
+
+# Install Python dependencies
+pip install -r requirements.txt
+```
+
+## Running the Application
+
+1. Start the backend server:
+```bash
+cd backend
+uvicorn main:app --reload --port 8000
+```
+
+2. Start the frontend development server:
+```bash
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+The application will be available at `http://localhost:8080`
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+## Code Structure
 
-**Use GitHub Codespaces**
+### Frontend Structure
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+```
+src/
+├── components/
+│   ├── AudioRecorder.tsx    # Live audio recording component
+│   ├── MediaUpload.tsx      # Media file upload component
+│   ├── ChatMessage.tsx      # Message display component
+│   ├── ChatInput.tsx        # Chat input with media controls
+│   └── views/
+│       └── ChatView.tsx     # Main chat interface
+├── services/
+│   └── api.ts              # API service functions
+└── hooks/
+    └── use-toast.ts        # Toast notification hook
+```
 
-## What technologies are used for this project?
+### Backend Structure
 
-This project is built with .
+```
+backend/
+├── main.py                 # FastAPI application and endpoints
+└── requirements.txt        # Python dependencies
+```
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+## API Endpoints
 
-## How can I deploy this project?
+### POST /api/upload-media
+Handles various types of media uploads:
+- Audio files (wav, mp3)
+- Images (jpg, png, gif)
+- Videos (mp4, webm)
+- PDFs
 
-Simply open [Lovable](https://lovable.dev/projects/e66ef2df-f986-4914-ae4f-9cea5e9477ea) and click on Share -> Publish.
+Returns processed context from the media for use in chat.
 
-## I want to use a custom domain - is that possible?
+### POST /api/chat
+Handles chat messages with optional media context.
 
-We don't support custom domains (yet). If you want to deploy your project under your own domain then we recommend using Netlify. Visit our docs for more details: [Custom domains](https://docs.lovable.dev/tips-tricks/custom-domain/)
+## Component Details
+
+### AudioRecorder
+- Implements live audio recording functionality
+- Uses the MediaRecorder API
+- Provides recording status feedback
+- Handles audio blob creation and upload
+
+### MediaUpload
+- Supports multiple file types
+- Provides upload status feedback
+- Integrates with AudioRecorder
+- Handles file validation and processing
+
+### ChatMessage
+- Renders different types of media
+- Supports code blocks with syntax highlighting
+- Handles message threading
+- Provides media preview capabilities
+
+### ChatView
+- Manages chat state and history
+- Handles message sending and receiving
+- Integrates all media components
+- Manages API communication
+
+## Media Processing
+
+### Audio Processing
+- Uses librosa for feature extraction
+- Supports various audio formats
+- Extracts relevant audio features for context
+
+### Image Processing
+- Processes images using PIL
+- Extracts image features and metadata
+- Supports common image formats
+
+### Video Processing
+- Uses OpenCV for video processing
+- Extracts key frames and features
+- Supports MP4 and WebM formats
+
+### PDF Processing
+- Uses PyMuPDF for text extraction
+- Processes document structure
+- Extracts relevant text content
+
+## Error Handling
+
+The application implements comprehensive error handling:
+- Media upload validation
+- Processing errors
+- API communication errors
+- User feedback through toast notifications
+
+## Best Practices
+
+1. Always handle media uploads with proper validation
+2. Implement error handling for all API calls
+3. Use appropriate media formats:
+   - Audio: WAV, MP3
+   - Images: JPG, PNG, GIF
+   - Video: MP4, WebM
+   - Documents: PDF
+
+## Security Considerations
+
+1. Implement file size limits
+2. Validate file types
+3. Sanitize user inputs
+4. Handle sensitive information appropriately
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Commit your changes
+4. Push to the branch
+5. Create a Pull Request
+
+## License
+
+MIT License
+
+## Support
+
+For support, please open an issue in the repository or contact the maintainers.
