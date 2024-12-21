@@ -27,6 +27,11 @@ export const ChatView: React.FC<ChatViewProps> = ({ messageHandler }) => {
       }
     } catch (error) {
       console.error('Error sending message:', error);
+      toast({
+        title: "Error sending message",
+        description: "Failed to send message. Please try again.",
+        variant: "destructive",
+      });
     }
   };
 
@@ -51,83 +56,86 @@ export const ChatView: React.FC<ChatViewProps> = ({ messageHandler }) => {
           </div>
         ))}
       </div>
-      <div className="flex gap-4">
-        <div className="flex flex-col items-center">
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={() => handleFeatureClick('Audio')}
-            className="flex-shrink-0"
-          >
-            <AudioLines className="h-4 w-4" />
-          </Button>
-          <span className="text-xs mt-1">Audio</span>
+      <div className="flex gap-4 items-end">
+        <div className="flex gap-4">
+          <div className="flex flex-col items-center">
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => handleFeatureClick('Audio')}
+              className="flex-shrink-0"
+            >
+              <AudioLines className="h-4 w-4" />
+            </Button>
+            <span className="text-xs mt-1">Audio</span>
+          </div>
+
+          <div className="flex flex-col items-center">
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => handleFeatureClick('Video')}
+              className="flex-shrink-0"
+            >
+              <Video className="h-4 w-4" />
+            </Button>
+            <span className="text-xs mt-1">Video</span>
+          </div>
+
+          <div className="flex flex-col items-center">
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => handleFeatureClick('Text')}
+              className="flex-shrink-0"
+            >
+              <FileText className="h-4 w-4" />
+            </Button>
+            <span className="text-xs mt-1">Text</span>
+          </div>
+
+          <div className="flex flex-col items-center">
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => handleFeatureClick('Excel')}
+              className="flex-shrink-0"
+            >
+              <FileSpreadsheet className="h-4 w-4" />
+            </Button>
+            <span className="text-xs mt-1">Excel</span>
+          </div>
+
+          <div className="flex flex-col items-center">
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => handleFeatureClick('PDF')}
+              className="flex-shrink-0"
+            >
+              <File className="h-4 w-4" />
+            </Button>
+            <span className="text-xs mt-1">PDF</span>
+          </div>
         </div>
 
-        <div className="flex flex-col items-center">
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={() => handleFeatureClick('Video')}
-            className="flex-shrink-0"
-          >
-            <Video className="h-4 w-4" />
-          </Button>
-          <span className="text-xs mt-1">Video</span>
-        </div>
-
-        <div className="flex flex-col items-center">
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={() => handleFeatureClick('Text')}
-            className="flex-shrink-0"
-          >
-            <FileText className="h-4 w-4" />
-          </Button>
-          <span className="text-xs mt-1">Text</span>
-        </div>
-
-        <div className="flex flex-col items-center">
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={() => handleFeatureClick('Excel')}
-            className="flex-shrink-0"
-          >
-            <FileSpreadsheet className="h-4 w-4" />
-          </Button>
-          <span className="text-xs mt-1">Excel</span>
-        </div>
-
-        <div className="flex flex-col items-center">
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={() => handleFeatureClick('PDF')}
-            className="flex-shrink-0"
-          >
-            <File className="h-4 w-4" />
-          </Button>
-          <span className="text-xs mt-1">PDF</span>
-        </div>
-
-        <div className="flex-1">
+        <div className="flex-1 flex gap-2">
           <input
             type="text"
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
             onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
-            className="w-full px-4 py-2 rounded-lg border focus:outline-none focus:ring-2"
+            className="flex-1 px-4 py-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-primary/20"
             placeholder="Type your message..."
           />
+          <Button
+            onClick={handleSendMessage}
+            className="px-4 py-2"
+            disabled={!inputValue.trim()}
+          >
+            Send
+          </Button>
         </div>
-        <button
-          onClick={handleSendMessage}
-          className="px-4 py-2 bg-primary text-primary-foreground rounded-lg"
-        >
-          Send
-        </button>
       </div>
     </div>
   );
