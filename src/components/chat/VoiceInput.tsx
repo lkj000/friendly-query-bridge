@@ -10,7 +10,7 @@ interface VoiceInputProps {
 
 export const VoiceInput: React.FC<VoiceInputProps> = ({ onTranscript, disabled }) => {
   const [isListening, setIsListening] = useState(false);
-  const [recognition, setRecognition] = useState<typeof window.SpeechRecognition | null>(null);
+  const [recognition, setRecognition] = useState<SpeechRecognition | null>(null);
   const { toast } = useToast();
 
   const startListening = useCallback(() => {
@@ -53,7 +53,7 @@ export const VoiceInput: React.FC<VoiceInputProps> = ({ onTranscript, disabled }
       };
 
       recognitionInstance.start();
-      setRecognition(recognitionInstance);
+      setRecognition(recognitionInstance as SpeechRecognition);
       setIsListening(true);
       
       toast({
