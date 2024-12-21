@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { MediaUpload } from './MediaUpload';
+import { VoiceInput } from './VoiceInput';
 import { Button } from '@/components/ui/button';
 import { Send } from 'lucide-react';
 
@@ -21,6 +22,10 @@ export const ChatInput: React.FC<ChatInputProps> = ({ onSendMessage, disabled })
     }
   };
 
+  const handleVoiceTranscript = (transcript: string) => {
+    setMessage(prev => prev + (prev ? ' ' : '') + transcript);
+  };
+
   return (
     <div className="border-t p-4 bg-background/80 backdrop-blur-sm">
       <div className="flex flex-col gap-4 max-w-4xl mx-auto">
@@ -32,6 +37,10 @@ export const ChatInput: React.FC<ChatInputProps> = ({ onSendMessage, disabled })
             onChange={(e) => setMessage(e.target.value)}
             placeholder={disabled ? "Processing..." : "Type your message..."}
             className="flex-1 px-4 py-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-primary/20"
+            disabled={disabled}
+          />
+          <VoiceInput 
+            onTranscript={handleVoiceTranscript}
             disabled={disabled}
           />
           <Button type="submit" disabled={disabled || (!message.trim() && !mediaContext)}>
