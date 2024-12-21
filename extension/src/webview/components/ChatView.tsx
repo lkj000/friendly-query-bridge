@@ -3,6 +3,7 @@ import { MessageHandler } from '../messageHandler';
 import { AudioLines, Video, FileText, FileSpreadsheet, File, Mic, MicOff, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
+import { ChatHeader } from '@/components/chat/ChatHeader';
 
 interface ChatViewProps {
   messageHandler: MessageHandler;
@@ -141,8 +142,9 @@ export const ChatView: React.FC<ChatViewProps> = ({ messageHandler }) => {
   };
 
   return (
-    <div className="flex flex-col h-full p-4">
-      <div className="flex-1 overflow-y-auto mb-4 space-y-4">
+    <div className="flex flex-col h-full">
+      <ChatHeader />
+      <div className="flex-1 overflow-y-auto mb-4 space-y-4 p-4">
         {messages.map((message, index) => (
           <div
             key={index}
@@ -154,7 +156,7 @@ export const ChatView: React.FC<ChatViewProps> = ({ messageHandler }) => {
           </div>
         ))}
       </div>
-      <div className="flex gap-4 items-end">
+      <div className="flex gap-4 items-end p-4">
         <div className="flex gap-4">
           <input
             type="file"
@@ -234,6 +236,7 @@ export const ChatView: React.FC<ChatViewProps> = ({ messageHandler }) => {
             </label>
             <span className="text-xs mt-1">PDF</span>
           </div>
+
         </div>
 
         <div className="flex-1 flex gap-2">
