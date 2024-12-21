@@ -3,6 +3,7 @@ import { ChatView } from './components/ChatView';
 import { ReportView } from './components/ReportView';
 import { VulnerabilityView } from '@/components/views/VulnerabilityView';
 import { DashboardView } from '@/components/views/DashboardView';
+import { ApiIntegrationsView } from '@/components/views/ApiIntegrationsView';
 import { OkoSidebarNav } from '@/components/sidebar/OkoSidebarNav';
 import { MessageHandler } from './messageHandler';
 
@@ -28,6 +29,7 @@ const WebviewApp: React.FC = () => {
         {activeView === 'prisma' && (
           <ReportView type="prisma" title="Prisma Cloud Security Report" messageHandler={messageHandler} />
         )}
+        {activeView === 'api-integrations' && <ApiIntegrationsView />}
       </div>
     </div>
   );

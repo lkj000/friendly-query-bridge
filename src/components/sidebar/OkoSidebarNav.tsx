@@ -1,6 +1,15 @@
 import React from 'react';
 import { Button } from "@/components/ui/button";
-import { MessageSquare, Shield, Bug, Lock, AlertTriangle, Network, LayoutDashboard } from "lucide-react";
+import { 
+  MessageSquare, 
+  Shield, 
+  Bug, 
+  Lock, 
+  AlertTriangle, 
+  Network, 
+  LayoutDashboard,
+  FileCode 
+} from "lucide-react";
 
 interface OkoSidebarNavProps {
   activeView: string;
@@ -42,7 +51,7 @@ export function OkoSidebarNav({ activeView, onViewChange }: OkoSidebarNavProps) 
         className="w-full justify-start"
         onClick={() => onViewChange('veracode')}
       >
-        <Shield className="mr-2 h-4 w-4" />
+        <FileCode className="mr-2 h-4 w-4" />
         Veracode Report
       </Button>
       
