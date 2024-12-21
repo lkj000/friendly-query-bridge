@@ -9,6 +9,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import jsPDF from 'jspdf';
 
 export function ExportButton() {
   const { toast } = useToast();
@@ -60,13 +61,64 @@ export function ExportButton() {
   };
 
   const generatePDF = async (data: any[]) => {
-    // For now, return a simple text representation
-    // In a real implementation, you would use a PDF library
-    return `Vulnerability Report\n\n${JSON.stringify(data, null, 2)}`;
+    const pdf = new jsPDF();
+    let yOffset = 20;
+
+    // Add title
+    pdf.setFontSize(16);
+    pdf.text('Vulnerability Report', 20, yOffset);
+    yOffset += 15;
+
+    // Add date
+    pdf.setFontSize(10);
+    pdf.text(`Generated on: ${new Date().toLocaleDateString()}`, 20, yOffset);
+    yOffset += 15;
+
+    // Add summary
+    pdf.setFontSize(12);
+    pdf.text(`Total Vulnerabilities: ${data.length}`, 20, yOffset);
+    yOffset += 10;
+
+    // Add table headers
+    pdf.setFontSize(10);
+    const headers = ['Severity', 'Source', 'Status', 'Created'];
+    const columnWidths = [30, 30, 30, 30];
+    let xOffset = 20;
+
+    headers.forEach((header, index) => {
+      pdf.text(header, xOffset, yOffset);
+      xOffset += columnWidths[index];
+    });
+    yOffset += 10;
+
+    // Add table rows
+    pdf.setFontSize(8);
+    data.forEach((item) => {
+      if (yOffset > 270) {
+        pdf.addPage();
+        yOffset = 20;
+      }
+
+      xOffset = 20;
+      pdf.text(item.severity, xOffset, yOffset);
+      xOffset += columnWidths[0];
+      
+      pdf.text(item.source, xOffset, yOffset);
+      xOffset += columnWidths[1];
+      
+      pdf.text(item.status, xOffset, yOffset);
+      xOffset += columnWidths[2];
+      
+      pdf.text(new Date(item.created_at).toLocaleDateString(), xOffset, yOffset);
+      
+      yOffset += 7;
+    });
+
+    return pdf.output('blob');
   };
 
-  const downloadFile = (content: string, filename: string, type: string) => {
-    const blob = new Blob([content], { type });
+  const downloadFile = (content: string | Blob, filename: string, type: string) => {
+    const blob = content instanceof Blob ? content : new Blob([content], { type });
     const url = window.URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
