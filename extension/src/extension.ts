@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+import * as path from 'path';
 
 export function activate(context: vscode.ExtensionContext) {
   // Register the custom sidebar provider
@@ -29,7 +30,12 @@ class OkoSidebarProvider implements vscode.WebviewViewProvider {
       localResourceRoots: [this._extensionUri]
     };
 
-    webviewView.webview.html = this._getHtmlForWebview(webviewView.webview);
+    // Get path to resource on disk
+    const scriptUri = webviewView.webview.asWebviewUri(
+      vscode.Uri.joinPath(this._extensionUri, 'out', 'webview', 'WebviewApp.js')
+    );
+
+    webviewView.webview.html = this._getHtmlForWebview(webviewView.webview, scriptUri);
 
     // Handle messages from the webview
     webviewView.webview.onDidReceiveMessage(async (data) => {
@@ -44,22 +50,22 @@ class OkoSidebarProvider implements vscode.WebviewViewProvider {
     });
   }
 
-  private _getHtmlForWebview(webview: vscode.Webview) {
-    // Convert your React app's index.html to a string that works in the webview
+  private _getHtmlForWebview(webview: vscode.Webview, scriptUri: vscode.Uri) {
     return `
       <!DOCTYPE html>
       <html lang="en">
         <head>
           <meta charset="UTF-8">
           <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src ${webview.cspSource} 'unsafe-inline'; script-src ${webview.cspSource} 'unsafe-inline';">
           <title>OKO Security</title>
         </head>
         <body>
           <div id="root"></div>
           <script>
-            // Initialize communication with the extension
             const vscode = acquireVsCodeApi();
           </script>
+          <script src="${scriptUri}"></script>
         </body>
       </html>
     `;
