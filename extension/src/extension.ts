@@ -34,26 +34,34 @@ class OkoSidebarProvider implements vscode.WebviewViewProvider {
       ]
     };
 
-    // Get resource URIs
-    const scriptUri = webviewView.webview.asWebviewUri(
-      vscode.Uri.joinPath(this._extensionUri, 'out', 'webview', 'index.js')
-    );
+    const scriptPathOnDisk = vscode.Uri.joinPath(this._extensionUri, 'out', 'webview', 'index.js');
+    const scriptUri = webviewView.webview.asWebviewUri(scriptPathOnDisk);
     
-    const styleUri = webviewView.webview.asWebviewUri(
-      vscode.Uri.joinPath(this._extensionUri, 'out', 'webview', 'style.css')
-    );
-
-    const reactUri = webviewView.webview.asWebviewUri(
-      vscode.Uri.joinPath(this._extensionUri, 'node_modules', 'react', 'umd', 'react.development.js')
-    );
-
-    const reactDomUri = webviewView.webview.asWebviewUri(
-      vscode.Uri.joinPath(this._extensionUri, 'node_modules', 'react-dom', 'umd', 'react-dom.development.js')
-    );
+    const stylePathOnDisk = vscode.Uri.joinPath(this._extensionUri, 'out', 'webview', 'style.css');
+    const styleUri = webviewView.webview.asWebviewUri(stylePathOnDisk);
 
     const nonce = getNonce();
 
-    webviewView.webview.html = this._getHtmlForWebview(webviewView.webview, scriptUri, styleUri, reactUri, reactDomUri, nonce);
+    webviewView.webview.html = `
+      <!DOCTYPE html>
+      <html lang="en">
+        <head>
+          <meta charset="UTF-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src ${webviewView.webview.cspSource} 'unsafe-inline'; script-src 'nonce-${nonce}' 'unsafe-eval'; img-src ${webviewView.webview.cspSource} https:; connect-src ${webviewView.webview.cspSource} https:;">
+          <link href="${styleUri}" rel="stylesheet">
+          <title>OKO Security</title>
+        </head>
+        <body>
+          <div id="root"></div>
+          <script nonce="${nonce}">
+            const vscode = acquireVsCodeApi();
+            window.vscode = vscode;
+          </script>
+          <script nonce="${nonce}" src="${scriptUri}"></script>
+        </body>
+      </html>
+    `;
 
     webviewView.webview.onDidReceiveMessage(async (data) => {
       console.log('Received message:', data);
@@ -67,44 +75,6 @@ class OkoSidebarProvider implements vscode.WebviewViewProvider {
           break;
       }
     });
-  }
-
-  private _getHtmlForWebview(
-    webview: vscode.Webview, 
-    scriptUri: vscode.Uri, 
-    styleUri: vscode.Uri,
-    reactUri: vscode.Uri,
-    reactDomUri: vscode.Uri,
-    nonce: string
-  ) {
-    return `
-      <!DOCTYPE html>
-      <html lang="en">
-        <head>
-          <meta charset="UTF-8">
-          <meta name="viewport" content="width=device-width, initial-scale=1.0">
-          <meta http-equiv="Content-Security-Policy" content="
-            default-src 'none';
-            style-src ${webview.cspSource} 'unsafe-inline';
-            script-src 'nonce-${nonce}' ${webview.cspSource};
-            img-src ${webview.cspSource} https:;
-            connect-src ${webview.cspSource} https:;
-          ">
-          <title>OKO Security</title>
-          <link href="${styleUri}" rel="stylesheet" />
-        </head>
-        <body>
-          <div id="root"></div>
-          <script nonce="${nonce}">
-            const vscode = acquireVsCodeApi();
-            window.vscode = vscode;
-          </script>
-          <script nonce="${nonce}" src="${reactUri}"></script>
-          <script nonce="${nonce}" src="${reactDomUri}"></script>
-          <script nonce="${nonce}" src="${scriptUri}"></script>
-        </body>
-      </html>
-    `;
   }
 }
 
