@@ -1,12 +1,7 @@
-export interface WebviewMessage {
-  type: 'fetchReport' | 'sendMessage';
-  payload: any;
-}
+import { MessageHandler } from './types';
 
-const API_URL = 'http://localhost:8000';
-
-export class MessageHandler {
-  private static instance: MessageHandler;
+export class DefaultMessageHandler implements MessageHandler {
+  private static instance: DefaultMessageHandler;
   private vscode: any;
 
   private constructor() {
@@ -14,11 +9,11 @@ export class MessageHandler {
     this.vscode = acquireVsCodeApi();
   }
 
-  public static getInstance(): MessageHandler {
-    if (!MessageHandler.instance) {
-      MessageHandler.instance = new MessageHandler();
+  public static getInstance(): DefaultMessageHandler {
+    if (!DefaultMessageHandler.instance) {
+      DefaultMessageHandler.instance = new DefaultMessageHandler();
     }
-    return MessageHandler.instance;
+    return DefaultMessageHandler.instance;
   }
 
   private async fetchFromBackend(endpoint: string, options: RequestInit = {}) {
@@ -51,7 +46,7 @@ export class MessageHandler {
     }
   }
 
-  public async sendChatMessage(message: string) {
+  public async sendChatMessage(message: string): Promise<string> {
     try {
       const response = await this.fetchFromBackend('/api/chat', {
         method: 'POST',
@@ -68,3 +63,5 @@ export class MessageHandler {
     }
   }
 }
+
+const API_URL = 'http://localhost:8000';
