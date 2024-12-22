@@ -2,6 +2,8 @@ import * as vscode from 'vscode';
 import * as path from 'path';
 
 export function activate(context: vscode.ExtensionContext) {
+  console.log('OKO extension is now active');
+  
   const provider = new OkoSidebarProvider(context.extensionUri);
   
   context.subscriptions.push(
@@ -23,34 +25,42 @@ class OkoSidebarProvider implements vscode.WebviewViewProvider {
     context: vscode.WebviewViewResolveContext,
     _token: vscode.CancellationToken,
   ) {
+    console.log('Resolving webview view');
+    
     webviewView.webview.options = {
       enableScripts: true,
       localResourceRoots: [
-        vscode.Uri.joinPath(this._extensionUri, 'out'),
-        vscode.Uri.joinPath(this._extensionUri, 'resources')
+        this._extensionUri
       ]
     };
 
-    const scriptPathOnDisk = vscode.Uri.joinPath(this._extensionUri, 'out', 'webview', 'index.js');
-    const scriptUri = webviewView.webview.asWebviewUri(scriptPathOnDisk);
+    const scriptUri = webviewView.webview.asWebviewUri(
+      vscode.Uri.joinPath(this._extensionUri, 'out', 'webview', 'index.js')
+    );
     
+    const styleUri = webviewView.webview.asWebviewUri(
+      vscode.Uri.joinPath(this._extensionUri, 'out', 'webview', 'style.css')
+    );
+
     const nonce = getNonce();
 
-    webviewView.webview.html = this._getHtmlForWebview(webviewView.webview, scriptUri, nonce);
+    webviewView.webview.html = this._getHtmlForWebview(webviewView.webview, scriptUri, styleUri, nonce);
 
     webviewView.webview.onDidReceiveMessage(async (data) => {
+      console.log('Received message:', data);
+      
       switch (data.type) {
         case 'fetchReport':
-          // Handle report fetching
+          console.log('Fetching report:', data.payload);
           break;
         case 'sendMessage':
-          // Handle chat messages
+          console.log('Sending message:', data.payload);
           break;
       }
     });
   }
 
-  private _getHtmlForWebview(webview: vscode.Webview, scriptUri: vscode.Uri, nonce: string) {
+  private _getHtmlForWebview(webview: vscode.Webview, scriptUri: vscode.Uri, styleUri: vscode.Uri, nonce: string) {
     return `
       <!DOCTYPE html>
       <html lang="en">
@@ -65,23 +75,13 @@ class OkoSidebarProvider implements vscode.WebviewViewProvider {
             connect-src ${webview.cspSource} https:;
           ">
           <title>OKO Security</title>
-          <style>
-            body {
-              padding: 0;
-              margin: 0;
-              width: 100%;
-              height: 100vh;
-              overflow: hidden;
-            }
-            #root {
-              height: 100%;
-            }
-          </style>
+          <link href="${styleUri}" rel="stylesheet" />
         </head>
         <body>
           <div id="root"></div>
           <script nonce="${nonce}">
             const vscode = acquireVsCodeApi();
+            window.vscode = vscode;
           </script>
           <script nonce="${nonce}" src="${scriptUri}"></script>
         </body>
