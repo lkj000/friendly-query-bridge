@@ -64,4 +64,6 @@ export class DefaultMessageHandler implements MessageHandler {
   }
 }
 
+export { MessageHandler };
+
 const API_URL = 'http://localhost:8000';
