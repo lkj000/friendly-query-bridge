@@ -1,5 +1,5 @@
 import React from 'react';
-import { AudioLines } from 'lucide-react';
+import { Mic } from 'lucide-react';
 import { MediaButton } from './MediaButton';
 
 interface AudioButtonProps {
@@ -26,7 +26,7 @@ export const AudioButton: React.FC<AudioButtonProps> = ({ onFileSelect, disabled
         disabled={disabled}
       />
       <MediaButton
-        icon={AudioLines}
+        icon={Mic}
         label="Audio"
         onClick={() => document.getElementById('file-audio')?.click()}
         disabled={disabled}
