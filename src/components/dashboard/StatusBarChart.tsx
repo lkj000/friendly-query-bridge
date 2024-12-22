@@ -1,6 +1,14 @@
 import React from 'react';
 import { Card } from "@/components/ui/card";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { 
+  BarChart as RechartsChart, 
+  Bar, 
+  XAxis, 
+  YAxis, 
+  CartesianGrid, 
+  Tooltip, 
+  ResponsiveContainer 
+} from 'recharts';
 
 interface StatusDistribution {
   status: string;
@@ -17,13 +25,13 @@ export function StatusBarChart({ data }: Props) {
       <h3 className="text-lg font-medium mb-4">Status Distribution</h3>
       <div className="h-[300px]">
         <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={data}>
+          <RechartsChart data={data} width={500} height={300}>
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey="status" />
             <YAxis />
             <Tooltip />
             <Bar dataKey="count" fill="#3b82f6" />
-          </BarChart>
+          </RechartsChart>
         </ResponsiveContainer>
       </div>
     </Card>
