@@ -1,5 +1,9 @@
 .vscode/**
 .vscode-test/**
+node_modules/**
+!node_modules/react/umd/react.development.js
+!node_modules/react-dom/umd/react-dom.development.js
+out/test/**
 src/**
 .gitignore
 .yarnrc
@@ -9,4 +13,3 @@ vsc-extension-quickstart.md
 **/.eslintrc.json
 **/*.map
 **/*.ts
-!resources/oko-icon.svg

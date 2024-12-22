@@ -34,6 +34,7 @@ class OkoSidebarProvider implements vscode.WebviewViewProvider {
       ]
     };
 
+    // Get resource URIs
     const scriptUri = webviewView.webview.asWebviewUri(
       vscode.Uri.joinPath(this._extensionUri, 'out', 'webview', 'index.js')
     );
@@ -42,9 +43,17 @@ class OkoSidebarProvider implements vscode.WebviewViewProvider {
       vscode.Uri.joinPath(this._extensionUri, 'out', 'webview', 'style.css')
     );
 
+    const reactUri = webviewView.webview.asWebviewUri(
+      vscode.Uri.joinPath(this._extensionUri, 'node_modules', 'react', 'umd', 'react.development.js')
+    );
+
+    const reactDomUri = webviewView.webview.asWebviewUri(
+      vscode.Uri.joinPath(this._extensionUri, 'node_modules', 'react-dom', 'umd', 'react-dom.development.js')
+    );
+
     const nonce = getNonce();
 
-    webviewView.webview.html = this._getHtmlForWebview(webviewView.webview, scriptUri, styleUri, nonce);
+    webviewView.webview.html = this._getHtmlForWebview(webviewView.webview, scriptUri, styleUri, reactUri, reactDomUri, nonce);
 
     webviewView.webview.onDidReceiveMessage(async (data) => {
       console.log('Received message:', data);
@@ -60,7 +69,14 @@ class OkoSidebarProvider implements vscode.WebviewViewProvider {
     });
   }
 
-  private _getHtmlForWebview(webview: vscode.Webview, scriptUri: vscode.Uri, styleUri: vscode.Uri, nonce: string) {
+  private _getHtmlForWebview(
+    webview: vscode.Webview, 
+    scriptUri: vscode.Uri, 
+    styleUri: vscode.Uri,
+    reactUri: vscode.Uri,
+    reactDomUri: vscode.Uri,
+    nonce: string
+  ) {
     return `
       <!DOCTYPE html>
       <html lang="en">
@@ -83,6 +99,8 @@ class OkoSidebarProvider implements vscode.WebviewViewProvider {
             const vscode = acquireVsCodeApi();
             window.vscode = vscode;
           </script>
+          <script nonce="${nonce}" src="${reactUri}"></script>
+          <script nonce="${nonce}" src="${reactDomUri}"></script>
           <script nonce="${nonce}" src="${scriptUri}"></script>
         </body>
       </html>
