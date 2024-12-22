@@ -1,15 +1,15 @@
 import React from 'react';
 import { ChatView } from './components/ChatView';
 import { ReportView } from './components/ReportView';
-import { VulnerabilityView } from '@/components/views/VulnerabilityView';
-import { DashboardView } from '@/components/views/DashboardView';
-import { ApiIntegrationsView } from '@/components/views/ApiIntegrationsView';
-import { OkoSidebarNav } from '@/components/sidebar/OkoSidebarNav';
-import { MessageHandler } from './messageHandler';
+import { VulnerabilityView } from './components/views/VulnerabilityView';
+import { DashboardView } from './components/views/DashboardView';
+import { ApiIntegrationsView } from './components/views/ApiIntegrationsView';
+import { OkoSidebarNav } from './components/sidebar/OkoSidebarNav';
+import { DefaultMessageHandler } from './messageHandler';
 
 const WebviewApp: React.FC = () => {
   const [activeView, setActiveView] = React.useState<string>('chat');
-  const messageHandler = MessageHandler.getInstance();
+  const messageHandler = DefaultMessageHandler.getInstance();
 
   return (
     <div className="flex h-screen bg-background">

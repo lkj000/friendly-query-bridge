@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { MessageHandler } from '../messageHandler';
 import { AudioLines, Video, FileText, FileSpreadsheet, File } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { useToast } from '@/hooks/use-toast';
+import { Button } from '../components/ui/button';
+import { useToast } from '../hooks/use-toast';
 
 interface ChatViewProps {
   messageHandler: MessageHandler;

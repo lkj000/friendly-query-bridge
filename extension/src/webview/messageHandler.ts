@@ -1,4 +1,7 @@
-import { MessageHandler } from './types';
+export interface MessageHandler {
+  sendChatMessage: (message: string) => Promise<string>;
+  fetchReport: (type: 'veracode' | 'sonar' | 'prisma') => Promise<any>;
+}
 
 export class DefaultMessageHandler implements MessageHandler {
   private static instance: DefaultMessageHandler;
@@ -63,7 +66,5 @@ export class DefaultMessageHandler implements MessageHandler {
     }
   }
 }
-
-export { MessageHandler };
 
 const API_URL = 'http://localhost:8000';
