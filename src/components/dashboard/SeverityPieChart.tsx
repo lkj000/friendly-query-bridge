@@ -4,7 +4,7 @@ import {
   ChartContainer,
   ChartTooltip,
 } from "@/components/ui/chart";
-import { PieChart as RechartsPieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts';
+import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip } from 'recharts';
 
 interface SeverityDistribution {
   name: string;
@@ -21,8 +21,8 @@ export function SeverityPieChart({ data, colors }: Props) {
     <Card className="p-4">
       <h3 className="text-lg font-medium mb-4">Severity Distribution</h3>
       <div className="h-[300px]">
-        <ChartContainer config={{}}>
-          <RechartsPieChart>
+        <ResponsiveContainer width="100%" height="100%">
+          <PieChart>
             <Pie
               data={data}
               dataKey="value"
@@ -39,9 +39,9 @@ export function SeverityPieChart({ data, colors }: Props) {
                 />
               ))}
             </Pie>
-            <ChartTooltip />
-          </RechartsPieChart>
-        </ChartContainer>
+            <Tooltip />
+          </PieChart>
+        </ResponsiveContainer>
       </div>
     </Card>
   );
