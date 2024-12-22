@@ -1,7 +1,8 @@
 import React from 'react';
 import { Card } from "@/components/ui/card";
+import { ChartContainer } from "@/components/ui/chart";
 import { 
-  BarChart as RechartsChart, 
+  BarChart, 
   Bar, 
   XAxis, 
   YAxis, 
@@ -24,15 +25,18 @@ export function StatusBarChart({ data }: Props) {
     <Card className="p-4">
       <h3 className="text-lg font-medium mb-4">Status Distribution</h3>
       <div className="h-[300px]">
-        <ResponsiveContainer width="100%" height="100%">
-          <RechartsChart data={data} width={500} height={300}>
+        <ChartContainer
+          config={{}}
+          className="w-full h-full"
+        >
+          <BarChart data={data}>
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey="status" />
             <YAxis />
             <Tooltip />
             <Bar dataKey="count" fill="#3b82f6" />
-          </RechartsChart>
-        </ResponsiveContainer>
+          </BarChart>
+        </ChartContainer>
       </div>
     </Card>
   );
