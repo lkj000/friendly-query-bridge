@@ -1,3 +1,4 @@
+import React from 'react';
 import { Card } from "@/components/ui/card";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -89,7 +90,7 @@ export function DashboardView() {
           <h3 className="text-lg font-medium mb-4">Severity Distribution</h3>
           <div className="h-[300px]">
             <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
+              <PieChart width={400} height={300}>
                 <Pie
                   data={getSeverityDistribution()}
                   dataKey="value"
@@ -116,7 +117,7 @@ export function DashboardView() {
           <h3 className="text-lg font-medium mb-4">Status Distribution</h3>
           <div className="h-[300px]">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={getStatusDistribution()}>
+              <BarChart width={500} height={300} data={getStatusDistribution()}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="status" />
                 <YAxis />
