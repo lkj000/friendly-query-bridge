@@ -7,8 +7,10 @@
     "sourceMap": true,
     "rootDir": "src",
     "strict": true,
-    "jsx": "react",
-    "esModuleInterop": true
+    "jsx": "react-jsx",
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true
   },
   "exclude": ["node_modules"]
 }
