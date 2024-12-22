@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Upload, Image, Video, FileText, FileSpreadsheet, AudioLines, File } from 'lucide-react';
+import { Upload, Image, Video, FileText, FileSpreadsheet, Mic, File } from 'lucide-react';
 import { Button } from './ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { API_URL } from '@/config/api';
@@ -63,7 +63,7 @@ export function MediaUpload({ onMediaContext }: MediaUploadProps) {
       <div className="flex flex-col items-center">
         <label htmlFor="media-upload" className="cursor-pointer">
           <Button variant="outline" size="icon" disabled={isUploading}>
-            <AudioLines className="h-4 w-4" />
+            <Mic className="h-4 w-4" />
           </Button>
         </label>
         <span className="text-xs mt-1">Audio</span>
