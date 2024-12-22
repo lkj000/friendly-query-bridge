@@ -15,8 +15,13 @@ import {
   Cell,
 } from 'recharts';
 
+interface VulnerabilityScan {
+  severity: string;
+  status: string;
+}
+
 export function DashboardView() {
-  const { data: vulnerabilities, isLoading } = useQuery({
+  const { data: vulnerabilities, isLoading } = useQuery<VulnerabilityScan[]>({
     queryKey: ['vulnerabilities'],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -37,7 +42,7 @@ export function DashboardView() {
   const getSeverityDistribution = () => {
     if (!vulnerabilities) return [];
     
-    const distribution = vulnerabilities.reduce((acc: any, curr) => {
+    const distribution = vulnerabilities.reduce((acc: Record<string, number>, curr) => {
       acc[curr.severity] = (acc[curr.severity] || 0) + 1;
       return acc;
     }, {});
@@ -51,7 +56,7 @@ export function DashboardView() {
   const getStatusDistribution = () => {
     if (!vulnerabilities) return [];
 
-    const distribution = vulnerabilities.reduce((acc: any, curr) => {
+    const distribution = vulnerabilities.reduce((acc: Record<string, number>, curr) => {
       acc[curr.status || 'open'] = (acc[curr.status || 'open'] || 0) + 1;
       return acc;
     }, {});
