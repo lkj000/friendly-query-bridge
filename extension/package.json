@@ -1,7 +1,7 @@
 {
   "name": "oko-vscode",
   "displayName": "OKO",
-  "description": "The OKO extension for Visual Studion Code is designed for development teams to seamlessly access and manage critical security and quality reports from Veracode, Sonar, and Prisma directly within VS Code. This tool enhances your development workflow by providing instant visibility into your project's security and compliance metrics while ensuring that your team stays connected through a user-friendly interface.",
+  "description": "The OKO extension for Visual Studio Code is designed for development teams to seamlessly access and manage critical security and quality reports from Veracode, Sonar, and Prisma directly within VS Code. This tool enhances your development workflow by providing instant visibility into your project's security and compliance metrics while ensuring that your team stays connected through a user-friendly interface.",
   "version": "0.0.1",
   "publisher": "okovanggoai",
   "repository": {
