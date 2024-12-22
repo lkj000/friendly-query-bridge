@@ -1,6 +1,7 @@
 import React from 'react';
 import { Card } from "@/components/ui/card";
-import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts';
+import * as RechartsPrimitive from "recharts";
+import { ChartContainer } from "@/components/ui/chart";
 
 interface SeverityDistribution {
   name: string;
@@ -17,9 +18,9 @@ export function SeverityPieChart({ data, colors }: Props) {
     <Card className="p-4">
       <h3 className="text-lg font-medium mb-4">Severity Distribution</h3>
       <div className="h-[300px]">
-        <ResponsiveContainer width="100%" height="100%">
-          <PieChart>
-            <Pie
+        <ChartContainer config={{}} className="w-full">
+          <RechartsPrimitive.PieChart>
+            <RechartsPrimitive.Pie
               data={data}
               dataKey="value"
               nameKey="name"
@@ -29,15 +30,15 @@ export function SeverityPieChart({ data, colors }: Props) {
               label
             >
               {data.map((entry, index) => (
-                <Cell 
+                <RechartsPrimitive.Cell 
                   key={`cell-${index}`} 
                   fill={colors[entry.name] || '#94a3b8'}
                 />
               ))}
-            </Pie>
-            <Tooltip />
-          </PieChart>
-        </ResponsiveContainer>
+            </RechartsPrimitive.Pie>
+            <RechartsPrimitive.Tooltip />
+          </RechartsPrimitive.PieChart>
+        </ChartContainer>
       </div>
     </Card>
   );
