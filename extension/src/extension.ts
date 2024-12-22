@@ -10,7 +10,7 @@ export function activate(context: vscode.ExtensionContext) {
     vscode.window.registerWebviewViewProvider("oko.securityView", provider)
   );
 
-  let openSidebarCommand = vscode.commands.registerCommand('oko.openSidebar', () => {
+  const openSidebarCommand = vscode.commands.registerCommand('oko.openSidebar', () => {
     vscode.commands.executeCommand('workbench.view.extension.oko-sidebar');
   });
 
