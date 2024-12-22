@@ -7,7 +7,7 @@ import {
   XAxis, 
   YAxis, 
   CartesianGrid, 
-  Tooltip, 
+  Tooltip,
   ResponsiveContainer 
 } from 'recharts';
 
@@ -16,21 +16,20 @@ interface StatusDistribution {
   count: number;
 }
 
-interface Props {
+interface StatusBarChartProps {
   data: StatusDistribution[];
 }
 
-export function StatusBarChart({ data }: Props) {
+export const StatusBarChart: React.FC<StatusBarChartProps> = ({ data }) => {
   return (
-    <Card className="p-4">
-      <h3 className="text-lg font-medium mb-4">Status Distribution</h3>
-      <div className="h-[300px]">
+    <Card>
+      <div className="p-4">
+        <h3 className="text-lg font-semibold mb-4">Status Distribution</h3>
         <ChartContainer
-          config={{}}
           className="w-full h-full"
         >
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart width={500} height={300} data={data}>
+          <ResponsiveContainer width="100%" height={300}>
+            <BarChart data={data}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="status" />
               <YAxis />
@@ -42,4 +41,4 @@ export function StatusBarChart({ data }: Props) {
       </div>
     </Card>
   );
-}
+};

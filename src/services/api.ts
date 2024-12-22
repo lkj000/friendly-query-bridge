@@ -1,5 +1,6 @@
 import { toast } from "@/hooks/use-toast";
 import { getVsCodeApi } from "@/utils/vscode";
+import { supabase } from "@/integrations/supabase/client";
 
 interface ApiResponse<T> {
   data?: T;
@@ -59,16 +60,31 @@ export const api = {
 
   async fetchSecurityReport(type: 'veracode' | 'sonar' | 'prisma'): Promise<ApiResponse<SecurityReport>> {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/reports/${type}`);
-      if (!response.ok) {
-        throw new Error('Failed to fetch report');
-      }
-      const data = await response.json();
-      return { data };
+      const { data: vulnerabilities, error } = await supabase
+        .from('vulnerability_scans')
+        .select('*')
+        .eq('source', type);
+
+      if (error) throw error;
+
+      const report: SecurityReport = {
+        highSeverity: vulnerabilities.filter(v => v.severity === 'high').length,
+        mediumSeverity: vulnerabilities.filter(v => v.severity === 'medium').length,
+        lastUpdated: new Date().toISOString(),
+        details: vulnerabilities.map(v => ({
+          id: v.id,
+          title: v.description,
+          severity: v.severity as 'high' | 'medium' | 'low',
+          description: v.description
+        }))
+      };
+
+      return { data: report };
     } catch (error) {
+      console.error('Error fetching security report:', error);
       toast({
         title: "Error fetching report",
-        description: "Could not fetch security report. Please check your VPN connection.",
+        description: "Could not fetch security report. Please try again later.",
         variant: "destructive",
       });
       return { error: 'Failed to fetch report' };
