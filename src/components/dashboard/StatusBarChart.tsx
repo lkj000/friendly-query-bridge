@@ -27,8 +27,17 @@ export const StatusBarChart: React.FC<StatusBarChartProps> = ({ data }) => {
         <h3 className="text-lg font-semibold mb-4">Status Distribution</h3>
         <ChartContainer
           className="w-full h-full"
+          config={{
+            status: {
+              theme: {
+                light: "#3b82f6",
+                dark: "#3b82f6"
+              }
+            }
+          }}
         >
           <ResponsiveContainer width="100%" height={300}>
+            {/* @ts-ignore - Known issue with Recharts types */}
             <BarChart data={data}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="status" />
