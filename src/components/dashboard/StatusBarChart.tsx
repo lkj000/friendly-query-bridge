@@ -2,7 +2,7 @@ import React from 'react';
 import { Card } from "@/components/ui/card";
 import { ChartContainer } from "@/components/ui/chart";
 import { 
-  BarChart as RechartsChart, 
+  BarChart, 
   Bar, 
   XAxis, 
   YAxis, 
@@ -30,13 +30,13 @@ export function StatusBarChart({ data }: Props) {
           className="w-full h-full"
         >
           <ResponsiveContainer width="100%" height="100%">
-            <RechartsChart data={data}>
+            <BarChart width={500} height={300} data={data}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="status" />
               <YAxis />
               <Tooltip />
               <Bar dataKey="count" fill="#3b82f6" />
-            </RechartsChart>
+            </BarChart>
           </ResponsiveContainer>
         </ChartContainer>
       </div>
