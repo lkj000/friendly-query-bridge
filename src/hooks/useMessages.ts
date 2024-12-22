@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
+import { API_URL } from '@/config/api';
 
 interface Message {
   content: string;
@@ -73,7 +74,7 @@ export const useMessages = (messageHandler: any) => {
       const formData = new FormData();
       formData.append('file', file);
 
-      const response = await fetch('http://localhost:8000/api/upload-media', {
+      const response = await fetch(`${API_URL}/api/upload-media`, {
         method: 'POST',
         body: formData,
       });

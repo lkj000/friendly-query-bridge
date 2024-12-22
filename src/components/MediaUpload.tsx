@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Upload, Image, Video, FileText, FileSpreadsheet, AudioLines, File } from 'lucide-react';
 import { Button } from './ui/button';
 import { useToast } from '@/hooks/use-toast';
+import { API_URL } from '@/config/api';
 
 interface MediaUploadProps {
   onMediaContext: (context: { type: string; content: string }) => void;
@@ -20,7 +21,7 @@ export function MediaUpload({ onMediaContext }: MediaUploadProps) {
       const formData = new FormData();
       formData.append('file', file);
 
-      const response = await fetch('http://localhost:8000/api/upload-media', {
+      const response = await fetch(`${API_URL}/api/upload-media`, {
         method: 'POST',
         body: formData,
       });
@@ -39,8 +40,8 @@ export function MediaUpload({ onMediaContext }: MediaUploadProps) {
     } catch (error) {
       console.error('Error uploading media:', error);
       toast({
-        title: "Error processing media",
-        description: "Failed to process file. Please try again.",
+        title: "Error uploading file",
+        description: "Failed to upload file. Please try again.",
         variant: "destructive",
       });
     } finally {
