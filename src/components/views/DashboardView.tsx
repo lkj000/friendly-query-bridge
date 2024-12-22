@@ -3,14 +3,14 @@ import { Card } from "@/components/ui/card";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import {
-  BarChart,
+  BarChart as RechartsBarChart,
   Bar,
   XAxis,
   YAxis,
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
-  PieChart,
+  PieChart as RechartsPieChart,
   Pie,
   Cell,
 } from 'recharts';
@@ -90,7 +90,7 @@ export function DashboardView() {
           <h3 className="text-lg font-medium mb-4">Severity Distribution</h3>
           <div className="h-[300px]">
             <ResponsiveContainer width="100%" height="100%">
-              <PieChart width={400} height={300}>
+              <RechartsPieChart>
                 <Pie
                   data={getSeverityDistribution()}
                   dataKey="value"
@@ -108,7 +108,7 @@ export function DashboardView() {
                   ))}
                 </Pie>
                 <Tooltip />
-              </PieChart>
+              </RechartsPieChart>
             </ResponsiveContainer>
           </div>
         </Card>
@@ -117,13 +117,13 @@ export function DashboardView() {
           <h3 className="text-lg font-medium mb-4">Status Distribution</h3>
           <div className="h-[300px]">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart width={500} height={300} data={getStatusDistribution()}>
+              <RechartsBarChart data={getStatusDistribution()}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="status" />
                 <YAxis />
                 <Tooltip />
                 <Bar dataKey="count" fill="#3b82f6" />
-              </BarChart>
+              </RechartsBarChart>
             </ResponsiveContainer>
           </div>
         </Card>
