@@ -1,15 +1,7 @@
 import React from 'react';
 import { Card } from "@/components/ui/card";
 import { ChartContainer } from "@/components/ui/chart";
-import { 
-  BarChart, 
-  Bar, 
-  XAxis, 
-  YAxis, 
-  CartesianGrid, 
-  Tooltip, 
-  ResponsiveContainer 
-} from 'recharts';
+import * as RechartsPrimitive from 'recharts';
 
 interface StatusDistribution {
   status: string;
@@ -29,13 +21,15 @@ export function StatusBarChart({ data }: Props) {
           config={{}}
           className="w-full h-full"
         >
-          <BarChart data={data}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="status" />
-            <YAxis />
-            <Tooltip />
-            <Bar dataKey="count" fill="#3b82f6" />
-          </BarChart>
+          <RechartsPrimitive.ResponsiveContainer>
+            <RechartsPrimitive.BarChart data={data}>
+              <RechartsPrimitive.CartesianGrid strokeDasharray="3 3" />
+              <RechartsPrimitive.XAxis dataKey="status" />
+              <RechartsPrimitive.YAxis />
+              <RechartsPrimitive.Tooltip />
+              <RechartsPrimitive.Bar dataKey="count" fill="#3b82f6" />
+            </RechartsPrimitive.BarChart>
+          </RechartsPrimitive.ResponsiveContainer>
         </ChartContainer>
       </div>
     </Card>
