@@ -3,14 +3,14 @@ import { Card } from "@/components/ui/card";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import {
-  BarChart,
+  BarChart as RechartsBarChart,
   Bar,
   XAxis,
   YAxis,
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
-  PieChart,
+  PieChart as RechartsPieChart,
   Pie,
   Cell,
 } from 'recharts';
@@ -18,6 +18,16 @@ import {
 interface VulnerabilityScan {
   severity: string;
   status: string;
+}
+
+interface SeverityDistribution {
+  name: string;
+  value: number;
+}
+
+interface StatusDistribution {
+  status: string;
+  count: number;
 }
 
 export function DashboardView() {
@@ -39,7 +49,7 @@ export function DashboardView() {
     low: '#22c55e',
   };
 
-  const getSeverityDistribution = () => {
+  const getSeverityDistribution = (): SeverityDistribution[] => {
     if (!vulnerabilities) return [];
     
     const distribution = vulnerabilities.reduce((acc: Record<string, number>, curr) => {
@@ -53,7 +63,7 @@ export function DashboardView() {
     }));
   };
 
-  const getStatusDistribution = () => {
+  const getStatusDistribution = (): StatusDistribution[] => {
     if (!vulnerabilities) return [];
 
     const distribution = vulnerabilities.reduce((acc: Record<string, number>, curr) => {
@@ -80,7 +90,7 @@ export function DashboardView() {
           <h3 className="text-lg font-medium mb-4">Severity Distribution</h3>
           <div className="h-[300px]">
             <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
+              <RechartsPieChart>
                 <Pie
                   data={getSeverityDistribution()}
                   dataKey="value"
@@ -98,7 +108,7 @@ export function DashboardView() {
                   ))}
                 </Pie>
                 <Tooltip />
-              </PieChart>
+              </RechartsPieChart>
             </ResponsiveContainer>
           </div>
         </Card>
@@ -107,13 +117,13 @@ export function DashboardView() {
           <h3 className="text-lg font-medium mb-4">Status Distribution</h3>
           <div className="h-[300px]">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={getStatusDistribution()}>
+              <RechartsBarChart data={getStatusDistribution()}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="status" />
                 <YAxis />
                 <Tooltip />
                 <Bar dataKey="count" fill="#3b82f6" />
-              </BarChart>
+              </RechartsBarChart>
             </ResponsiveContainer>
           </div>
         </Card>
